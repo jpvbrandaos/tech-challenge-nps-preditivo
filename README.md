@@ -4,19 +4,25 @@
 ## Objetivo
 
 ## Base de Dados
-- **Origem**
 
-Os dados brutos originais, por serem de tamanho compatível com o GitHub,  estão disponíveis no repositório (*data/raw/desafio_nps_fase_1.csv*) e também podem ser obtidos através do link público:     [desafio_nps_fase_1.csv](https://github.com/AnaRaquelCafe/POSTECH_AI_SCIENTIST/blob/main/Base%20de%20dados%20Tech%20Challenge/desafio_nps_fase_1.csv)
+- **Origem dos dados**
 
-- **Tamanho**
+A base de dados utilizada neste projeto é proveniente do repositório público [POSTECH_AI_SCIENTIST](https://github.com/AnaRaquelCafe/POSTECH_AI_SCIENTIST), disponibilizada no arquivo [`desafio_nps_fase_1.csv`](https://github.com/AnaRaquelCafe/POSTECH_AI_SCIENTIST/blob/main/Base%20de%20dados%20Tech%20Challenge/desafio_nps_fase_1.csv).
 
-A base de dados não apresenta pedidos duplicados, logo cada linha representa um pedido. Ademais, constam 2500 linhas e 19 colunas no arquivo.
+- **Download da base de dados**
+
+Para reproduzir as análises, baixe o arquivo original e salve-o no diretório `data/raw/`, na raiz deste projeto. O download pode ser realizado manualmente pelo link acima ou pelo terminal, utilizando o PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force -Path "data/raw" | Out-Null
+curl.exe -fL "https://raw.githubusercontent.com/AnaRaquelCafe/POSTECH_AI_SCIENTIST/main/Base%20de%20dados%20Tech%20Challenge/desafio_nps_fase_1.csv" -o "data/raw/desafio_nps_fase_1.csv"
+```
+
+Execute os comandos a partir da raiz do repositório. O diretório de destino será criado caso não exista, e o arquivo será salvo com o nome original esperado pelo projeto. Após o download, verifique se o arquivo foi obtido corretamente antes de executar as análises.
 
 - **Dicionário de dados**
 
-O arquivo de markdown abaixo explica cada uma das variáveis da base dados.
-
-[references/dicionario_de_dados.md](references/dicionario_de_dados.md)
+O dicionário de dados, disponível em [`references/dicionario_de_dados.md`](references/dicionario_de_dados.md), descreve as variáveis da base de dados e suas respectivas definições.
 
 
 ## Metodologia
