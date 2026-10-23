@@ -190,3 +190,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# Pasta .vscode
+echo ".vscode/" >> .gitignore
