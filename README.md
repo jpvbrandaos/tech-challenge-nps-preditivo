@@ -4,6 +4,20 @@
 ## Objetivo
 
 ## Base de Dados
+- **Origem**
+
+Os dados brutos originais, por serem de tamanho compatível com o GitHub,  estão disponíveis no repositório (*data/raw/desafio_nps_fase_1.csv*) e também podem ser obtidos através do link público:     [desafio_nps_fase_1.csv](https://github.com/AnaRaquelCafe/POSTECH_AI_SCIENTIST/blob/main/Base%20de%20dados%20Tech%20Challenge/desafio_nps_fase_1.csv)
+
+- **Tamanho**
+
+A base de dados não apresenta pedidos duplicados, logo cada linha representa um pedido. Ademais, constam 2500 linhas e 19 colunas no arquivo.
+
+- **Dicionário de dados**
+
+O arquivo de markdown abaixo explica cada uma das variáveis da base dados.
+
+[references/dicionario_de_dados.md](references/dicionario_de_dados.md)
+
 
 ## Metodologia
 
