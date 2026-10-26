@@ -3,6 +3,10 @@
 
 ## Objetivo
 
+Identificar as falhas de entrega e atendimento que mais transformam clientes em detratores e estimar, logo após a entrega, o risco de cada cliente se tornar detrator, a tempo de a empresa agir antes da pesquisa de NPS. O projeto responde ao Tech Challenge da Fase 1 da Pós-Tech AI Scientist (FIAP).
+
+O problema de negócio, as metas e os critérios de sucesso estão em [Entendimento do negócio](reports/entendimento_negocio.md).
+
 ## Base de Dados
 
 - **Origem dos dados**
@@ -99,9 +103,11 @@ Requer Python 3.13 e Git.
 
 ## Registro de Decisões
 
+As decisões do projeto, com contexto, alternativa descartada e motivo, ficam em [Registro de decisões](reports/registro_decisoes.md).
+
 ## Limitações e Próximos Passos
 
-## Convenções
+Por enquanto, as premissas, restrições e riscos conhecidos estão na [seção 7 do entendimento do negócio](reports/entendimento_negocio.md#7-premissas-restrições-e-riscos).
 
 ## Convenções
 
