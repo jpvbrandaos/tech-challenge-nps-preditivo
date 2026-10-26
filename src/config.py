@@ -30,3 +30,12 @@ except ModuleNotFoundError:
     pass
 
 RANDOM_SEED = 42
+
+
+# Base bruta: fonte oficial e impressão digital esperada (fora do Git, decisão D-01)
+RAW_DATA_URL = (
+    "https://raw.githubusercontent.com/AnaRaquelCafe/POSTECH_AI_SCIENTIST/main/"
+    "Base%20de%20dados%20Tech%20Challenge/desafio_nps_fase_1.csv"
+)
+RAW_DATA_FILE = RAW_DATA_DIR / "desafio_nps_fase_1.csv"
+RAW_DATA_SHA256 = "cc97b3ebb94ed7251c2ae37ee813381207023e8ef1b0cd32c339844c4347b42b"
