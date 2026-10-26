@@ -102,7 +102,7 @@ Requer Python 3.13 e Git.
 
 ## Registro de Decisões
 
-As decisões do projeto, com contexto, alternativa descartada e motivo, ficam em [Registro de decisões](reports/registro_decisoes.md).
+As decisões do projeto, com contexto, alternativas consideradas, justificativa e consequências, ficam em [Registro de decisões](reports/registro_decisoes.md).
 
 ## Limitações e Próximos Passos
 
