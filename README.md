@@ -15,14 +15,13 @@ A base de dados utilizada neste projeto é proveniente do repositório público 
 
 - **Download da base de dados**
 
-Para reproduzir as análises, baixe o arquivo original e salve-o no diretório `data/raw/`, na raiz deste projeto. O download pode ser realizado manualmente pelo link acima ou pelo terminal, utilizando o PowerShell:
+Por decisão de versionamento (D-01), o arquivo original não é armazenado no repositório. Sua obtenção é automatizada pelo módulo src.dataset, responsável por baixar os dados da fonte original e salvá-los no diretório data/raw/.
 
-```powershell
-New-Item -ItemType Directory -Force -Path "data/raw" | Out-Null
-curl.exe -fL "https://raw.githubusercontent.com/AnaRaquelCafe/POSTECH_AI_SCIENTIST/main/Base%20de%20dados%20Tech%20Challenge/desafio_nps_fase_1.csv" -o "data/raw/desafio_nps_fase_1.csv"
-```
+Para obter a base de dados, execute o seguinte comando na raiz do projeto:
 
-Execute os comandos a partir da raiz do repositório. O diretório de destino será criado caso não exista, e o arquivo será salvo com o nome original esperado pelo projeto. Após o download, verifique se o arquivo foi obtido corretamente antes de executar as análises.
+    python -m src.dataset
+
+Após o download, a integridade do arquivo é verificada por meio do cálculo do hash SHA-256 e da comparação com o valor de referência definido em src/config.py. Essa validação permite identificar divergências em relação ao arquivo original esperado.
 
 - **Dicionário de dados**
 
@@ -97,7 +96,7 @@ Requer Python 3.13 e Git.
    - Windows (PowerShell): `py -3.13 -m venv .venv` e `.\.venv\Scripts\Activate.ps1`
    - Linux ou macOS: `python3.13 -m venv .venv` e `source .venv/bin/activate`
 3. Instale as dependências: `pip install -r requirements.txt`
-4. A base já vem em `data/raw/`; a origem está em Base de dados.
+4. Baixe a base e confira a integridade: `python -m src.dataset`. Na primeira vez o comando precisa de internet; depois, ele só confere o arquivo.
 5. Execute os notebooks na ordem numérica, do início ao fim.
 
 
