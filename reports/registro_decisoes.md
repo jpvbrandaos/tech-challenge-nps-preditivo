@@ -1,39 +1,39 @@
 # Registro de decisões
 
-Decisões relevantes do projeto, com o porquê de cada uma. Decisões novas entram no fim. Uma decisão revista não é apagada: ganha uma entrada nova que cita a anterior.
+Decisões que afetam escopo, dados, métricas ou método do projeto. Cada entrada registra contexto, alternativas avaliadas, justificativa e consequências. Uma decisão aceita não é editada: se for revista, a revisão entra como nova decisão, e a anterior passa a constar como substituída.
 
-## D-01 — A base de dados não é versionada no Git
+## D-01: Base de dados fora do controle de versão
 
-- **Data e etapa:** 23/10/2026, Etapa 0
-- **Contexto:** a base é um arquivo CSV público, mantido no repositório da disciplina.
-- **Decisão:** o arquivo fica fora do Git. A pasta `data/` está no `.gitignore`, e o README indica a fonte oficial e o comando que baixa o arquivo.
-- **Alternativa descartada:** versionar o CSV em `data/raw/`.
-- **Por quê:** dados e código têm ciclos de vida diferentes, e a fonte oficial continua sendo uma só, sem cópias que possam divergir.
-- **Consequências:** um clone novo não traz a base. O comando `python -m src.dataset` baixa o arquivo para `data/raw/` e confere a integridade dele pelo SHA-256.
+- **Status:** aceita em 23/10/2026
+- **Contexto:** a base é um arquivo CSV publicado num repositório público do GitHub, que é a fonte oficial dos dados.
+- **Decisão:** o arquivo não é versionado. A pasta `data/` fica no `.gitignore`, e o comando `python -m src.dataset` baixa a base da fonte oficial para `data/raw/` e confere o SHA-256 antes do uso.
+- **Alternativas consideradas:** versionar o CSV em `data/raw/`; versionar com DVC ou Git LFS.
+- **Justificativa:** a fonte oficial continua única, sem cópias que possam divergir, e o hash garante que toda execução use o mesmo arquivo. DVC e Git LFS acrescentariam infraestrutura sem ganho para um arquivo estático e público.
+- **Consequências:** um clone novo não traz a base, e a reprodução começa pelo download, que exige acesso à internet. Se a fonte alterar o arquivo, a conferência do hash interrompe a execução, e a nova versão só entra no projeto por meio de uma nova decisão.
 
-## D-02 — Dúvidas sobre a base viram premissas documentadas
+## D-02: Proporção de detratores como indicador-alvo
 
-- **Data e etapa:** 26/10/2026, Etapa 1
-- **Contexto:** o enunciado e o dicionário de dados deixam pontos em aberto, como o momento de coleta do CSAT, a forma de cálculo do atraso e a classificação de notas com casa decimal. Consultar os professores é possível, mas as respostas chegariam em prazo incerto e ficariam fora do repositório.
-- **Decisão:** cada ponto em aberto vira uma premissa escrita, com o trecho do enunciado ou do dicionário que a sustenta e a etapa em que será testada. As premissas de negócio estão na [seção 7 do entendimento do negócio](entendimento_negocio.md#7-premissas-restrições-e-riscos); as que tratam do uso das variáveis no modelo entram na definição da target (Etapa 2).
-- **Alternativa descartada:** consultar os professores e esperar as respostas antes de seguir.
-- **Por quê:** uma premissa escrita pode ser auditada e revista por quem lê o repositório, e o projeto não fica parado à espera de resposta.
-- **Consequências:** toda premissa testável é testada assim que a base permitir. Premissa contrariada pelos dados gera uma decisão nova, que cita esta. As que não puderem ser testadas entram nas limitações do README.
+- **Status:** aceita em 26/10/2026
+- **Contexto:** o NPS agrega promotores e detratores num único número, e o mesmo valor pode resultar de distribuições muito diferentes. As ações ao alcance da operação, como reduzir atrasos, acelerar a resolução e compensar falhas, atuam sobre pedidos com experiência ruim.
+- **Decisão:** a meta de negócio é a proporção de detratores. O NPS segue como indicador de acompanhamento.
+- **Alternativas consideradas:** usar o NPS como meta; usar a nota média.
+- **Justificativa:** converter um detrator em neutro tem no NPS o mesmo efeito que converter um neutro em promotor, e é no detrator que se espera encontrar falhas operacionais corrigíveis. A nota média trata uma escala ordinal como contínua e não corresponde a nenhum indicador acompanhado pela empresa.
+- **Consequências:** segmentos são comparados por proporção de detratores e NPS, nunca pela nota média. A definição operacional de detrator, incluindo a regra para notas com casa decimal, fica para a Etapa 2.
 
-## D-03 — Partes 1 e 2 entregues em Markdown, em `reports/`, com link no README
+## D-03: Critérios de sucesso fixados antes da análise
 
-- **Data e etapa:** 26/10/2026, Etapa 1
-- **Contexto:** o enunciado faz perguntas nas Partes 1 e 2, mas o formato de entrega cita só repositório, slides e vídeo, sem dizer onde ficam essas respostas.
-- **Decisão:** cada parte vira um documento Markdown em `reports/`, com link no README: `entendimento_negocio.md` para a Parte 1 e `definicao_target.md` para a Parte 2. Os slides trazem a síntese.
-- **Alternativa descartada:** responder só nos slides.
-- **Por quê:** o avaliador lê o repositório. O Markdown aparece formatado no GitHub, fica versionado e comporta o raciocínio completo, que nos slides precisaria ser cortado.
-- **Consequências:** documentos e slides precisam trazer os mesmos números e conclusões, e essa conferência entra na revisão final (Etapa 10).
+- **Status:** aceita em 26/10/2026
+- **Contexto:** métricas e limiares escolhidos depois de ver os resultados tendem a se ajustar a eles, o que compromete a avaliação.
+- **Decisão:** os critérios de sucesso ficam registrados na [seção 2 do entendimento do negócio](entendimento_negocio.md#2-metas-e-critérios-de-sucesso) antes de qualquer análise. O modelo é avaliado por PR-AUC e pela proporção de detratores capturados entre os 20% de maior risco, sempre contra o modelo ingênuo e a melhor regra simples da análise exploratória. Os valores-alvo são fixados ao fim da análise exploratória, antes do treino de qualquer modelo.
+- **Alternativas consideradas:** definir métricas e alvos depois da modelagem; usar acurácia ou ROC-AUC como métrica principal.
+- **Justificativa:** a operação vai agir sobre uma lista priorizada de clientes, e PR-AUC e captura no topo medem a qualidade dessa lista. Se os detratores forem minoria, a acurácia favorece o modelo que nunca aponta risco, e a ROC-AUC pode ser alta mesmo com precisão baixa no topo do ranking.
+- **Consequências:** trocar de métrica ou de corte depois de ver os resultados exige nova decisão justificada. O corte de 20% reflete uma capacidade de contato ainda não validada com o atendimento.
 
-## D-04 — A Parte 4 é feita, mesmo sendo opcional
+## D-04: Score de risco calculado após a entrega
 
-- **Data e etapa:** 26/10/2026, Etapa 1
-- **Contexto:** o enunciado declara a Parte 4 opcional, "sem impacto negativo para quem optar por não realizá-lo". O vídeo, porém, precisa destacar como o modelo pode apoiar decisões reais, e os slides pedem a pergunta que o modelo busca responder quando o desafio é feito.
-- **Decisão:** fazer a Parte 4, no mínimo a estratégia preditiva (Etapa 5) e uma versão enxuta do modelo em Python (Etapa 6).
-- **Alternativa descartada:** pular a Parte 4 e dedicar o tempo só às partes obrigatórias.
-- **Por quê:** sem modelo, um dos pontos obrigatórios do vídeo fica vago, e antecipar o risco de detrator é metade do problema de negócio ([seção 1 do entendimento do negócio](entendimento_negocio.md#1-o-problema-de-negócio)).
-- **Consequências:** as partes obrigatórias têm prioridade no cronograma. A Parte 4 começa depois da análise exploratória, com o escopo ajustado ao tempo que restar.
+- **Status:** aceita em 26/10/2026
+- **Contexto:** a pesquisa de NPS só chega depois do fim da jornada. Para agir antes dela, o risco precisa ser estimado quando as falhas da operação já são conhecidas e ainda há tempo de intervir.
+- **Decisão:** o score de risco de detrator é calculado logo após a entrega, com dados de cadastro, pedido, entrega e atendimento registrados até esse momento.
+- **Alternativas consideradas:** calcular no checkout, só com dados de cadastro e pedido.
+- **Justificativa:** após a entrega, atrasos e tentativas frustradas já aconteceram, e ainda cabem contato e compensação antes da pesquisa. No checkout, o score ignoraria justamente as falhas que o diagnóstico precisa priorizar.
+- **Consequências:** variáveis posteriores à pesquisa, como a recompra em 30 dias, ficam fora do modelo, e a lista de variáveis permitidas sai do mapa da jornada, na Etapa 2. O cenário de checkout pode servir de comparação, para medir quanto valem os dados de entrega e atendimento.

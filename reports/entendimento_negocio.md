@@ -1,4 +1,4 @@
-# Entendimento do negócio — NPS Preditivo
+# Entendimento do negócio
 
 ## Resumo
 
@@ -31,7 +31,7 @@ São dois problemas encadeados. O diagnóstico pergunta quais fatores operaciona
 
 | Tipo | Critério | Como se mede | Quando |
 | --- | --- | --- | --- |
-| Analítico | A análise exploratória responde às quatro perguntas da Parte 3 | Cada resposta com o número e o tamanho do grupo que a sustentam | Análise exploratória (Etapa 4) |
+| Analítico | A análise exploratória responde às quatro perguntas de negócio: fatores críticos, causas de detratores, ponto de ruptura e perfis de cliente | Cada resposta com o número e o tamanho do grupo que a sustentam | Análise exploratória (Etapa 4) |
 | Analítico | Cada hipótese da seção 8 recebe um veredito | Confirmada, refutada ou inconclusiva, com o número que decide | Análise exploratória (Etapa 4) |
 | Modelo | O score supera o modelo ingênuo e a melhor regra simples | PR-AUC e % dos detratores que caem entre os 20% de maior risco, no mesmo conjunto de teste | Modelo (Etapa 6) |
 | Negócio | Agir nos clientes de risco reduz a proporção de detratores | Comparação com um grupo de controle sorteado | Piloto, depois do projeto |
@@ -44,11 +44,11 @@ Os alvos numéricos dependem da proporção de detratores na base, que define o 
 - **Custo de atendimento e de compensação por pedido.** Contato proativo e cupom custam dinheiro, e a melhora precisa caber na margem.
 - **Prazo prometido no checkout e taxa de conversão.** Alongar a promessa de entrega reduz o atraso no papel e afasta o cliente antes da compra.
 
-A meta analítica indica onde e com quem agir. A meta de negócio mede se a ação funcionou, e as métricas de proteção confirmam que a melhora veio da experiência do cliente, não de um atalho.
+A meta analítica indica onde e com quem agir. A meta de negócio mede se a ação funcionou, e as métricas de proteção confirmam que a melhora veio da experiência do cliente.
 
 ## 3. Por que o NPS importa para um e-commerce
 
-O NPS nasce de uma pergunta: de 0 a 10, qual a probabilidade de o cliente recomendar a empresa a um amigo ou colega (Reichheld, 2003). Notas 9 e 10 são promotores; 7 e 8, neutros; 0 a 6, detratores. O NPS é o percentual de promotores menos o de detratores, de −100 a +100; os neutros contam no total, mas não entram na subtração. Como a base registra notas com uma casa decimal, a regra para classificar uma nota como 6,9 fica para a definição da target (Etapa 2).
+O NPS parte de uma única pergunta: de 0 a 10, qual a probabilidade de o cliente recomendar a empresa a um amigo ou colega (Reichheld, 2003). Notas 9 e 10 são promotores; 7 e 8, neutros; 0 a 6, detratores. O NPS é o percentual de promotores menos o de detratores, de −100 a +100; os neutros contam no total, mas não entram na subtração. Como a base registra notas com uma casa decimal, a regra para classificar uma nota como 6,9 fica para a definição da target (Etapa 2).
 
 A conta explica o foco no detrator. Em 200 respostas com 90 promotores, 60 neutros e 50 detratores, o NPS é +20. Se 10 detratores passarem a neutros, ele vai a +25, o mesmo efeito de 10 neutros virarem promotores. E é no detrator que se espera achar a falha concreta, como atraso ou atendimento lento, que a operação sabe corrigir.
 
@@ -71,13 +71,13 @@ A tabela liga cada área à decisão que a análise apoia, às variáveis que a 
 | Produto | Se vale registrar produto e categoria junto com a nota | Nenhuma variável direta | Incluir categoria, SKU e motivo da nota na pesquisa | Relatório trimestral |
 | Estratégia (liderança de CX) | Em que área investir primeiro | Todas, pela matriz de impacto × frequência | Ordenar o roadmap por detratores evitáveis e custo de cada ação | Resumo trimestral |
 
-Produto aparece no enunciado, mas não na base. A análise só pode tratá-lo de forma indireta. Detratores sem nenhuma falha de entrega ou atendimento (H9) apontam para causas fora da operação medida, como o próprio produto ou a expectativa criada na venda. No consumidor.gov.br, produto danificado ou que não funciona somou 7,77% dos problemas apontados no comércio eletrônico em 2025 (Senacon, 2025). Isso justifica passar a registrar produto e categoria junto com a nota.
+Produto é uma das áreas que a análise deveria apoiar, mas a base não traz nenhuma variável de produto. A análise só pode tratá-lo de forma indireta. Detratores sem nenhuma falha de entrega ou atendimento (H9) apontam para causas fora da operação medida, como o próprio produto ou a expectativa criada na venda. No consumidor.gov.br, produto danificado ou que não funciona somou 7,77% dos problemas apontados no comércio eletrônico em 2025 (Senacon, 2025). Isso justifica passar a registrar produto e categoria junto com a nota.
 
 A prioridade entre as áreas cabe à liderança de Experiência do Cliente, com dois números por ação: quantos detratores ela pode evitar e quanto custa.
 
 ## 5. Como o NPS impacta recompra, boca a boca e market share
 
-O enunciado pede uma reflexão e dispensa dados externos. O raciocínio segue esta cadeia:
+O efeito do NPS sobre o resultado segue esta cadeia:
 
 **experiência operacional → NPS → recompra e boca a boca → receita e custo de aquisição → market share**
 
@@ -116,7 +116,7 @@ Os indicadores externos posicionam a empresa diante do mercado; os internos comp
 
 ## 7. Premissas, restrições e riscos
 
-O enunciado e o dicionário de dados deixam pontos em aberto. Cada um vira uma premissa escrita, com o trecho que a sustenta e o momento do teste, conforme a decisão D-02 do [registro de decisões](registro_decisoes.md). A maior parte dos testes acontece na Etapa 3, de qualidade e tratamento dos dados.
+O briefing e o dicionário de dados deixam pontos em aberto sobre a base. Cada um é tratado como premissa, com a evidência que a sustenta e o momento em que será testada, a maioria na Etapa 3, de qualidade e tratamento dos dados.
 
 **Premissas**
 
@@ -125,8 +125,8 @@ O enunciado e o dicionário de dados deixam pontos em aberto. Cada um vira uma p
 | P1 | A nota avalia a experiência daquele pedido, não o relacionamento com a marca | Dicionário: nota "coletada após a experiência de compra", uma por `order_id` | Não se verifica na base; orienta a comparação com benchmarks |
 | P2 | As variáveis de entrega e atendimento se referem ao pedido avaliado, não ao histórico do cliente | Estão na linha do pedido, mas o dicionário fala em contatos "do cliente" e reclamações "registradas pelo cliente" | Etapa 3: ver se essas contagens se repetem entre pedidos do mesmo cliente |
 | P3 | `delivery_delay_days` conta os dias além do prazo prometido e está contido em `delivery_time_days` | Dicionário: "Quantidade de dias de atraso na entrega" | Etapa 3: atraso nunca maior que o tempo de entrega; checagem de valores negativos |
-| P4 | Só tem nota quem respondeu à pesquisa, e as conclusões valem para quem responde | Enunciado: o NPS é coletado "após o encerramento da jornada de compra", sem dizer quem é convidado | Etapa 3: notas ausentes em `nps_score` |
-| P5 | A base é tratada como registro real da operação. Com sinais de simulação, as conclusões passam a valer como demonstração de método | O case é acadêmico e não identifica a empresa | Etapa 3: distribuições e relações regulares demais |
+| P4 | Só tem nota quem respondeu à pesquisa, e as conclusões valem para quem responde | Briefing: o NPS é coletado "após o encerramento da jornada de compra", sem dizer quem é convidado | Etapa 3: notas ausentes em `nps_score` |
+| P5 | A base é tratada como registro real da operação. Com sinais de simulação, as conclusões passam a valer como demonstração de método | A base não identifica a empresa nem informa como os pedidos foram selecionados | Etapa 3: distribuições e relações regulares demais |
 
 As premissas sobre o uso das variáveis no modelo, como o momento de coleta do CSAT e as notas com casa decimal, ficam na definição da target (Etapa 2).
 
@@ -134,7 +134,7 @@ As premissas sobre o uso das variáveis no modelo, como o momento de coleta do C
 
 - **De dados.** Sem data do pedido, não há como analisar tendência e sazonalidade nem validar o modelo no tempo. A base também não traz produto, categoria, canal de venda, transportadora, forma de pagamento (só o número de parcelas), comentário da pesquisa nem dados de quem não respondeu.
 - **Legais.** Idade e região, ligadas a `customer_id`, são dados pessoais sob a LGPD (Brasil, 2018). O tratamento deve respeitar finalidade e necessidade e não pode ter fins discriminatórios ilícitos ou abusivos (art. 6º, incisos I, III e IX). Por isso, esses atributos servem ao diagnóstico e à checagem de erros do modelo por grupo, e nenhuma ação dá tratamento pior a um cliente por causa deles.
-- **De projeto.** Prazo da fase, trabalho individual sem revisão de pares (compensado por pull requests revisadas e checklists), nenhuma consulta aos professores (D-02) e base fora do Git, obtida por script que confere a integridade do arquivo (D-01).
+- **De projeto.** Prazo fixo de entrega e projeto conduzido por uma pessoa, sem revisão por pares; cada etapa passa por pull request com checklist. A base fica fora do Git e é obtida por script que confere a integridade do arquivo (D-01 no [registro de decisões](registro_decisoes.md)).
 
 **Riscos**
 
@@ -149,7 +149,7 @@ As premissas sobre o uso das variáveis no modelo, como o momento de coleta do C
 
 ## 8. Hipóteses para a análise exploratória
 
-Cada hipótese pode ser confirmada ou derrubada pela base e traz o mecanismo que a justifica e a ação que muda se ela se confirmar. H1 a H7 cobrem entrega, atendimento, preço e perfil; H8 e H9 tentam explicar a frase central do case, a de clientes com indicadores parecidos que terminam em lados opostos. A prioridade é alta quando o impacto esperado é alto e a base permite o teste completo.
+Cada hipótese pode ser confirmada ou derrubada pela base e traz o mecanismo que a justifica e a ação que muda se ela se confirmar. H1 a H7 cobrem entrega, atendimento, preço e perfil; H8 e H9 tentam explicar a observação central do briefing: clientes com indicadores parecidos que terminam em lados opostos. A prioridade é alta quando o impacto esperado é alto e a base permite o teste completo.
 
 | # | Hipótese | Mecanismo | Como testar | Se confirmada, que ação | Prioridade |
 | --- | --- | --- | --- | --- | --- |
