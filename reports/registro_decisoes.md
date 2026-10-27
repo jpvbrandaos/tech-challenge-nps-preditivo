@@ -46,3 +46,12 @@ Decisões que afetam escopo, dados, métricas ou método do projeto. Cada entrad
 - **Alternativas consideradas:** arredondar a nota para o inteiro mais próximo antes de classificar.
 - **Justificativa:** o corte direto não altera o dado e não cria promotores nem neutros que a nota não atingiu: um 8,6 ainda não chegou a 9. Notas como 6,9 ficam como detrator, o lado conservador para um modelo cuja função é não deixar cliente em risco sem atenção. O arredondamento traz ainda uma armadilha de implementação: o `round` do Python arredonda 6,5 para 6 e 7,5 para 8.
 - **Consequências:** `nps_category` e `is_detractor` seguem esta regra em todo o projeto. A Etapa 3 calcula a proporção de detratores pelas duas regras e registra a diferença.
+
+## D-06: Variáveis permitidas no modelo de risco
+
+- **Status:** aceita em 27/10/2026
+- **Contexto:** o score é calculado logo após a entrega (D-04), e a base mistura informações anteriores e posteriores à pesquisa de NPS. O dicionário não informa quando o CSAT é coletado.
+- **Decisão:** entram no modelo os dados de cadastro, pedido e entrega e os registros de atendimento existentes até o momento da predição. Ficam fora o `nps_score`, que é o alvo, o `csat_internal_score`, a `repeat_purchase_30d` e os identificadores.
+- **Alternativas consideradas:** usar todas as variáveis da base; manter o CSAT como preditora.
+- **Justificativa:** uma variável registrada depois da pesquisa antecipa o resultado que o modelo deveria prever: ele vai bem no teste e falha na operação. Como o momento do CSAT é desconhecido, excluí-lo é o lado seguro.
+- **Consequências:** a Etapa 6 inclui um experimento de vazamento, que treina também com o CSAT para mostrar o desempenho artificialmente alto, e um teste sem `resolution_time_days`. O `customer_id` não entra como preditor, mas separa treino e teste por cliente se houver clientes com mais de um pedido.

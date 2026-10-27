@@ -29,4 +29,27 @@ A definição operacional abaixo vale para todo o projeto, da preparação dos d
 A base registra notas com uma casa decimal, como 6,9, e as faixas do NPS foram definidas para notas inteiras. As faixas são aplicadas direto sobre a nota original, sem arredondamento ([D-05](registro_decisoes.md#d-05-corte-direto-nas-faixas-do-nps-para-notas-com-casa-decimal)). Um 8,6 ainda não chegou a 9 e segue neutro; um 6,9 fica como detrator, o lado conservador quando o objetivo é não deixar cliente em risco sem atenção. Arredondar criaria promotores e neutros que a nota não atingiu e inflaria o NPS. A Etapa 3, de qualidade dos dados, mede a diferença entre as duas regras.
 
 ## 3. Momento da coleta e variáveis disponíveis
+
+O NPS é coletado depois do encerramento da jornada de compra, segundo o briefing, e se refere ao pedido avaliado: o dicionário descreve a nota como "coletada após a experiência de compra". O momento de coleta do CSAT não é informado.
+
+Como o score de risco é calculado logo após a entrega ([D-04](registro_decisoes.md#d-04-score-de-risco-calculado-após-a-entrega)), só pode entrar no modelo o que já existe nesse momento. A tabela mostra quando cada variável passa a existir e o uso permitido:
+
+| Momento | Variáveis | Uso no modelo |
+| --- | --- | --- |
+| Cadastro e histórico | `customer_age`, `customer_region`, `customer_tenure_months` | Entram |
+| Checkout | `order_value`, `items_quantity`, `discount_value`, `payment_installments`, `freight_value` | Entram |
+| Entrega | `delivery_time_days`, `delivery_delay_days`, `delivery_attempts` | Entram |
+| Atendimento, durante a jornada | `customer_service_contacts`, `complaints_count`, `resolution_time_days` | Entram com o que foi registrado até a predição |
+| Pesquisa, após o fim da jornada | `nps_score` | É a variável-alvo |
+| Não informado | `csat_internal_score` | Fica fora; serve para validar a variável-alvo |
+| Até 30 dias após o pedido | `repeat_purchase_30d` | Fica fora: é consequência da experiência |
+| Identificação | `customer_id`, `order_id` | Ficam fora; `customer_id` serve para separar treino e teste por cliente, se houver clientes com mais de um pedido |
+
+Duas premissas sustentam a tabela:
+
+- **CSAT:** o dicionário não informa quando ele é coletado. Na dúvida, ele é tratado como coletado junto com a pesquisa ou depois dela; fica fora do modelo e serve para validar a variável-alvo.
+- **Atendimento:** contatos, reclamações e tempo de resolução são tratados como registros da jornada do pedido, anteriores à pesquisa. Em produção, só entra o que estiver registrado no momento da predição. Na base histórica os valores são finais, o que pode deixar a avaliação do modelo otimista; a Etapa 6 mede esse efeito treinando também sem `resolution_time_days`.
+
+A lista de variáveis permitidas está formalizada na [D-06](registro_decisoes.md#d-06-variáveis-permitidas-no-modelo-de-risco).
+
 ## 4. Riscos de uso inadequado
