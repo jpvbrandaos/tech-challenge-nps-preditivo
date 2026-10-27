@@ -30,6 +30,11 @@ O dicionário de dados, disponível em [`references/dicionario_de_dados.md`](ref
 
 ## Metodologia
 
+O projeto segue as fases do CRISP-DM, cada uma com um documento ou notebook próprio:
+
+1. [Entendimento do negócio](reports/entendimento_negocio.md): problema, metas e critérios de sucesso, premissas e hipóteses.
+2. [Definição da variável-alvo](reports/definicao_target.md): escolha da variável, regra de classificação, variáveis permitidas no modelo e riscos de uso.
+
 ## Principais Resultados
 
 ## Estrutura do Repositório

@@ -1,6 +1,9 @@
 # Definição da variável-alvo
 
 ## Resumo
+
+A variável-alvo é o `nps_score`, convertido em `is_detractor` (nota abaixo de 7, sem arredondamento) para o modelo de risco. Foi escolhido por ser o indicador que a empresa quer melhorar, comparável com o mercado e coletado por pedido. A nota é registrada na pesquisa enviada após o fim da jornada; por isso, o modelo usa apenas informações disponíveis logo após a entrega. O principal risco é o vazamento de dados, tratado ao manter fora do modelo o CSAT, a recompra e qualquer registro posterior à pesquisa (D-06).
+
 ## 1. Variável que representa a satisfação
 
 Três colunas da base medem algo próximo de satisfação. A comparação abaixo define o papel de cada uma no projeto.
@@ -17,7 +20,7 @@ A variável-alvo é o `nps_score`: é o indicador que a empresa quer melhorar e 
 
 O `nps_score` é o indicador que a empresa já acompanha e quer melhorar: o briefing descreve o problema como a variação do NPS entre perfis de clientes. É comparável com o mercado, desde que se respeite a diferença entre NPS transacional e relacional ([seção 3 do entendimento do negócio](entendimento_negocio.md#3-por-que-o-nps-importa-para-um-e-commerce)). E é coletado por pedido, o que permite ligar cada nota às falhas daquela jornada.
 
-Duas distinções orientam o uso da variável. O `nps_score` é a nota de cada cliente, e o NPS é a métrica do grupo: o modelo estima o risco de cada cliente, enquanto a gestão acompanha o NPS e a proporção de detratores ([D-02](registro_decisoes.md#d-02-proporção-de-detratores-como-indicador-alvo)). O NPS também mede intenção de recomendar, que é próxima de satisfação, mas não igual: um cliente satisfeito pode não recomendar por não ter a quem, e a nota não diz qual falha pesou.
+Duas distinções orientam o uso da variável. O `nps_score` é a nota de cada cliente, e o NPS é a métrica do grupo. O modelo estima o risco de cada cliente, enquanto a gestão acompanha o NPS e a proporção de detratores ([D-02](registro_decisoes.md#d-02-proporção-de-detratores-como-indicador-alvo)). O NPS também mede intenção de recomendar, que é próxima de satisfação, mas não igual. Um cliente satisfeito pode não recomendar por não ter a quem, e a nota não diz qual falha pesou.
 
 A definição operacional abaixo vale para todo o projeto, da preparação dos dados ao modelo:
 
