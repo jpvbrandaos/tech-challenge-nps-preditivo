@@ -53,3 +53,20 @@ Duas premissas sustentam a tabela:
 A lista de variáveis permitidas está formalizada na [D-06](registro_decisoes.md#d-06-variáveis-permitidas-no-modelo-de-risco).
 
 ## 4. Riscos de uso inadequado
+
+Cada risco abaixo vem acompanhado da decisão do projeto que o previne.
+
+| Risco | Como aparece | Como o projeto evita |
+| --- | --- | --- |
+| Vazamento de dados | Um modelo treinado com CSAT ou recompra acerta quase tudo no teste e falha na operação, porque essas variáveis só existem depois da pesquisa | D-06: só entram variáveis disponíveis no momento da predição |
+| Causalidade reversa | Reclamação e recompra podem ser efeito da insatisfação, e não causa: o cliente reclama porque já está insatisfeito | Achados descritos como associação; a reclamação é analisada junto com a falha que a originou, como o atraso |
+| Nota tratada como número contínuo | A média esconde o NPS: se todos dão 8, a média é 8 e o NPS é 0; se metade dá 9 e metade dá 7, a média continua 8, mas o NPS é +50 | D-02: segmentos comparados por proporção de detratores e NPS, nunca pela nota média |
+| Não resposta | Só tem nota quem respondeu, e quem responde tende a ter opinião mais forte | A Etapa 3 mede as notas ausentes, e a taxa de resposta é métrica de proteção ([seção 2 do entendimento do negócio](entendimento_negocio.md#2-metas-e-critérios-de-sucesso)) |
+| Nota influenciada pelo último evento | A nota pesa o que aconteceu por último e o humor do dia, não a jornada inteira | A nota é lida como avaliação daquele pedido, e a ação é por faixa de risco, não por nota exata |
+| Uso diferente da escala | Regiões e perfis dão notas diferentes para a mesma experiência | Regiões comparadas dentro da mesma faixa de atraso (H7 do [entendimento do negócio](entendimento_negocio.md#8-hipóteses-para-a-análise-exploratória)) e erro do modelo verificado por grupo |
+| NPS como meta de equipe | A nota sobe sem melhora real, por exemplo com pedido explícito de nota 10 ou escolha de quem recebe a pesquisa | Métricas de proteção; a equipe avaliada não escolhe quem recebe a pesquisa |
+| Clientes com vários pedidos | Clientes frequentes pesam mais na análise, e o mesmo cliente pode cair no treino e no teste | A Etapa 3 verifica `customer_id` repetido; havendo repetição, treino e teste são separados por cliente |
+| Uso discriminatório de idade e região | Clientes tratados de forma desigual por atributos pessoais | Idade e região usadas só no diagnóstico e na checagem de erro do modelo por grupo, conforme a LGPD |
+| Valores finais de atendimento na base histórica | O tempo de resolução registrado pode incluir o que aconteceu depois da predição, e a avaliação do modelo fica otimista | Teste do modelo sem `resolution_time_days` na Etapa 6 (D-06) |
+
+O vazamento é o risco de maior impacto, porque só aparece quando o modelo já está em operação; a D-06 é a principal proteção contra ele.
