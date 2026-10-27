@@ -37,3 +37,12 @@ Decisões que afetam escopo, dados, métricas ou método do projeto. Cada entrad
 - **Alternativas consideradas:** calcular no checkout, só com dados de cadastro e pedido.
 - **Justificativa:** após a entrega, atrasos e tentativas frustradas já aconteceram, e ainda cabem contato e compensação antes da pesquisa. No checkout, o score ignoraria justamente as falhas que o diagnóstico precisa priorizar.
 - **Consequências:** variáveis posteriores à pesquisa, como a recompra em 30 dias, ficam fora do modelo, e a lista de variáveis permitidas sai do mapa da jornada, na Etapa 2. O cenário de checkout pode servir de comparação, para medir quanto valem os dados de entrega e atendimento.
+
+## D-05: Corte direto nas faixas do NPS para notas com casa decimal
+
+- **Status:** aceita em 27/10/2026
+- **Contexto:** a base registra notas com uma casa decimal, como 6,9, e as faixas do NPS foram definidas para notas inteiras de 0 a 10.
+- **Decisão:** as faixas são aplicadas direto sobre a nota original: detrator abaixo de 7, neutro de 7 até antes de 9 e promotor a partir de 9, sem arredondamento.
+- **Alternativas consideradas:** arredondar a nota para o inteiro mais próximo antes de classificar.
+- **Justificativa:** o corte direto não altera o dado e não cria promotores nem neutros que a nota não atingiu: um 8,6 ainda não chegou a 9. Notas como 6,9 ficam como detrator, o lado conservador para um modelo cuja função é não deixar cliente em risco sem atenção. O arredondamento traz ainda uma armadilha de implementação: o `round` do Python arredonda 6,5 para 6 e 7,5 para 8.
+- **Consequências:** `nps_category` e `is_detractor` seguem esta regra em todo o projeto. A Etapa 3 calcula a proporção de detratores pelas duas regras e registra a diferença.
