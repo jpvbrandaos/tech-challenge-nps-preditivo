@@ -1,5 +1,6 @@
 # NPS Preditivo
-- Resumo a preencher
+
+Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS. O diagnóstico da base está concluído: os dados são íntegros, mas têm sinais claros de simulação, e as conclusões valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)). A análise exploratória e o modelo de risco vêm nas próximas etapas.
 
 ## Objetivo
 
@@ -25,7 +26,11 @@ Após o download, a integridade do arquivo é verificada por meio do cálculo do
 
 - **Dicionário de dados**
 
-O dicionário de dados, disponível em [`references/dicionario_de_dados.md`](references/dicionario_de_dados.md), descreve as variáveis da base de dados e suas respectivas definições.
+O dicionário de dados, disponível em [`references/dicionario_de_dados.md`](references/dicionario_de_dados.md), descreve as variáveis da base de dados e suas respectivas definições, as leituras adotadas pelo projeto e os atributos da base tratada.
+
+- **Base tratada**
+
+O notebook 01 gera `data/processed/base_tratada.csv`, com todos os pedidos e colunas originais e os atributos de negócio de `src/features.py`. Como a base bruta, ela fica fora do Git e é recriada a cada execução do notebook.
 
 
 ## Metodologia
@@ -34,61 +39,46 @@ O projeto segue as fases do CRISP-DM, cada uma com um documento ou notebook pró
 
 1. [Entendimento do negócio](reports/entendimento_negocio.md): problema, metas e critérios de sucesso, premissas e hipóteses.
 2. [Definição da variável-alvo](reports/definicao_target.md): escolha da variável, regra de classificação, variáveis permitidas no modelo e riscos de uso.
+3. [Qualidade e preparação dos dados](notebooks/01_qualidade_e_tratamento.ipynb): diagnóstico da base, decisões de tratamento e base tratada com os atributos de negócio.
 
 ## Principais Resultados
 
+### Qualidade dos dados
+
+- A base tem 2.500 pedidos e 19 colunas, sem valores ausentes, duplicidades ou valores fora de faixa, e cada cliente aparece em um único pedido.
+- Três leituras mudaram com o diagnóstico: o tempo de entrega é a previsão informada ao cliente ([D-07](reports/registro_decisoes.md#d-07-tempo-de-entrega-lido-como-previsão)), o valor do pedido já vem com o desconto ([D-08](reports/registro_decisoes.md#d-08-valor-do-pedido-lido-como-líquido-do-desconto)), e contatos, reclamações e tempo de resolução são registros independentes ([D-09](reports/registro_decisoes.md#d-09-registros-de-atendimento-lidos-como-independentes)).
+- Distribuições planas e relações esperadas ausentes indicam base simulada, e as conclusões do projeto valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)).
+- O detrator é a grande maioria: 84,4% dos pedidos pelo corte direto da D-05, com NPS de −80,0. O arredondamento levaria a 79,0% e −72,8, sem mudar a conclusão.
+
 ## Estrutura do Repositório
 
-<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
-    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
-</a>
-
+Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/).
 
 ```
-├── LICENSE            <- Open-source license if one is chosen
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-├── README.md          <- The top-level README for developers using this project.
-├── data
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── docs               <- A default mkdocs project; see www.mkdocs.org for details
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
-│
-├── pyproject.toml     <- Project configuration file with package metadata for 
-│                         src and configuration for tools like black
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.cfg          <- Configuration file for flake8
-│
-└── src   <- Source code for use in this project.
-    │
-    ├── __init__.py             <- Makes src a Python module
-    │
-    ├── config.py               <- Store useful variables and configuration
-    │
-    ├── dataset.py              <- Scripts to download or generate data
-    │
-    ├── features.py             <- Code to create features for modeling
-    │
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
-    │   └── train.py            <- Code to train models
-    │
-    └── plots.py                <- Code to create visualizations
+├── data/                        # fora do Git (D-01)
+│   ├── raw/                     # base original, baixada por python -m src.dataset
+│   └── processed/               # base tratada, gerada pelo notebook 01
+├── models/                      # modelo treinado, na etapa de modelagem
+├── notebooks/
+│   └── 01_qualidade_e_tratamento.ipynb
+├── references/
+│   └── dicionario_de_dados.md
+├── reports/
+│   ├── entendimento_negocio.md
+│   ├── definicao_target.md
+│   ├── registro_decisoes.md
+│   └── figures/
+├── src/
+│   ├── config.py                # caminhos, semente e fonte da base
+│   ├── dataset.py               # download da base e conferência do SHA-256
+│   ├── features.py              # atributos de negócio da base tratada
+│   ├── plots.py                 # gráficos, na análise exploratória
+│   └── modeling/                # treino e predição, na etapa de modelagem
+├── tests/                       # download, atributos e qualidade da base tratada
+├── LICENSE
+├── Makefile
+├── pyproject.toml
+└── requirements.txt
 ```
 
 ## Como Reproduzir
@@ -103,6 +93,7 @@ Requer Python 3.13 e Git.
 3. Instale as dependências: `pip install -r requirements.txt`
 4. Baixe a base e confira a integridade: `python -m src.dataset`. Na primeira vez o comando precisa de internet; depois, ele só confere o arquivo.
 5. Execute os notebooks na ordem numérica, do início ao fim.
+6. Rode os testes: `python -m pytest tests`. Os testes da base tratada pedem o notebook 01 já executado.
 
 
 ## Registro de Decisões
@@ -111,14 +102,19 @@ As decisões do projeto, com contexto, alternativas consideradas, justificativa 
 
 ## Limitações e Próximos Passos
 
-Por enquanto, as premissas, restrições e riscos conhecidos estão na [seção 7 do entendimento do negócio](reports/entendimento_negocio.md#7-premissas-restrições-e-riscos).
+- **Base simulada.** As conclusões valem como demonstração de método, e não como retrato de uma operação real (D-10).
+- **Não resposta.** A base traz só quem respondeu à pesquisa, e o viés de não resposta não pode ser medido.
+- **Atendimento.** Reclamações e tempo de resolução não se vinculam com segurança ao pedido avaliado (D-09).
+- **Próximos passos.** Análise exploratória das hipóteses H1 a H9 e, depois, o modelo de risco.
+
+As premissas, restrições e riscos completos estão na [seção 7 do entendimento do negócio](reports/entendimento_negocio.md#7-premissas-restrições-e-riscos).
 
 ## Convenções
 
 - Código em inglês e `snake_case`, como as colunas da base; textos em português.
 - Notebooks numerados na ordem de execução (`01_`, `02_`, `03_`).
 - Todo notebook roda do início ao fim (Restart & Run All) antes do commit e vai com as saídas.
-- Caminhos sempre via `src/config.py`; semente sempre `RANDOM_STATE`.
+- Caminhos sempre via `src/config.py`; semente sempre `RANDOM_SEED`.
 - `data/raw/` é imutável.
 - Commits no padrão Conventional Commits, em português.
 - Uma branch e uma pull request por etapa.
@@ -134,9 +130,4 @@ A análise e a modelagem preditiva deste projeto foram desenvolvidas por:
 
 Administrador pela UFMG e pós-graduando em IA na FIAP. Trabalho combinando visão de negócios e ciência de dados para transformar análises e modelos preditivos em soluções que geram resultado real.
 
-[LinkedIn](https://linkedin.com) | [GitHub](https://github.com)
-
-
-
-
---------
+[GitHub](https://github.com/jpvbrandaos)

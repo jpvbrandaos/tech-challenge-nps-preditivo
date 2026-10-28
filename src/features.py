@@ -1,29 +1,78 @@
-from pathlib import Path
+"""Atributos de negócio da base de pedidos."""
 
-from loguru import logger
-from tqdm import tqdm
-import typer
+import numpy as np
+import pandas as pd
 
-from src.config import PROCESSED_DATA_DIR
+# Faixas do NPS aplicadas direto sobre a nota, sem arredondar (D-05)
+DETRACTOR_BELOW = 7
+PROMOTER_FROM = 9
+NPS_CATEGORIES = ["detrator", "neutro", "promotor"]
 
-app = typer.Typer()
+# Faixas de negócio, fechadas à direita: 2 dias de atraso caem em "1 a 2 dias"
+DELAY_BINS = [-np.inf, 0, 2, 4, np.inf]
+DELAY_LABELS = ["sem atraso", "1 a 2 dias", "3 a 4 dias", "5 dias ou mais"]
+TENURE_BINS = [-np.inf, 12, 36, 60, np.inf]
+TENURE_LABELS = ["até 1 ano", "1 a 3 anos", "3 a 5 anos", "mais de 5 anos"]
+AGE_BINS = [17, 24, 34, 44, 54, np.inf]
+AGE_LABELS = ["18 a 24", "25 a 34", "35 a 44", "45 a 54", "55 ou mais"]
+
+# Resolução acima de uma semana conta como falha no friction_score
+LONG_RESOLUTION_DAYS = 7
+
+FEATURE_COLUMNS = [
+    "nps_category",
+    "is_detractor",
+    "is_late",
+    "delay_bucket",
+    "actual_delivery_days",
+    "discount_pct",
+    "freight_pct",
+    "avg_item_value",
+    "had_contact",
+    "multiple_attempts",
+    "tenure_bucket",
+    "age_bucket",
+    "friction_score",
+]
 
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "features.csv",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Generating features from dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Features generation complete.")
-    # -----------------------------------------
+def classify_nps(score: pd.Series) -> pd.Series:
+    """Classifica cada nota em detrator, neutro ou promotor, sem arredondar (D-05)."""
+    return pd.cut(
+        score,
+        bins=[-np.inf, DETRACTOR_BELOW, PROMOTER_FROM, np.inf],
+        labels=NPS_CATEGORIES,
+        right=False,  # faixas fechadas à esquerda: 7,0 já é neutro e 9,0 já é promotor
+    )
 
 
-if __name__ == "__main__":
-    app()
+def build_features(raw: pd.DataFrame) -> pd.DataFrame:
+    """Acrescenta os atributos de negócio, sem excluir pedidos nem alterar as colunas originais."""
+    data = raw.copy()
+
+    data["nps_category"] = classify_nps(data["nps_score"])
+    data["is_detractor"] = (data["nps_category"] == "detrator").astype(int)
+
+    # O tempo de entrega é a previsão informada ao cliente, e o atraso, os dias além dela (D-07)
+    data["is_late"] = (data["delivery_delay_days"] > 0).astype(int)
+    data["delay_bucket"] = pd.cut(data["delivery_delay_days"], DELAY_BINS, labels=DELAY_LABELS)
+    data["actual_delivery_days"] = data["delivery_time_days"] + data["delivery_delay_days"]
+
+    # O valor do pedido já vem com o desconto aplicado (D-08)
+    data["discount_pct"] = data["discount_value"] / (data["order_value"] + data["discount_value"])
+    data["freight_pct"] = data["freight_value"] / data["order_value"]
+    data["avg_item_value"] = data["order_value"] / data["items_quantity"]
+
+    data["had_contact"] = (data["customer_service_contacts"] > 0).astype(int)
+    data["multiple_attempts"] = (data["delivery_attempts"] > 1).astype(int)
+    data["tenure_bucket"] = pd.cut(
+        data["customer_tenure_months"], TENURE_BINS, labels=TENURE_LABELS
+    )
+    data["age_bucket"] = pd.cut(data["customer_age"], AGE_BINS, labels=AGE_LABELS)
+
+    # Falhas da jornada; a reclamação fica de fora porque quase todo cliente tem uma (D-09)
+    long_resolution = (data["resolution_time_days"] > LONG_RESOLUTION_DAYS).astype(int)
+    data["friction_score"] = (
+        data["is_late"] + data["multiple_attempts"] + data["had_contact"] + long_resolution
+    )
+    return data
