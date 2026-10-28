@@ -1,29 +1,19 @@
-from pathlib import Path
+"""Atributos de negócio da base de pedidos."""
 
-from loguru import logger
-from tqdm import tqdm
-import typer
+import numpy as np
+import pandas as pd
 
-from src.config import PROCESSED_DATA_DIR
-
-app = typer.Typer()
-
-
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "features.csv",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Generating features from dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Features generation complete.")
-    # -----------------------------------------
+# Faixas do NPS aplicadas direto sobre a nota, sem arredondar (D-05)
+DETRACTOR_BELOW = 7
+PROMOTER_FROM = 9
+NPS_CATEGORIES = ["detrator", "neutro", "promotor"]
 
 
-if __name__ == "__main__":
-    app()
+def classify_nps(score: pd.Series) -> pd.Series:
+    """Classifica cada nota em detrator, neutro ou promotor, sem arredondar (D-05)."""
+    return pd.cut(
+        score,
+        bins=[-np.inf, DETRACTOR_BELOW, PROMOTER_FROM, np.inf],
+        labels=NPS_CATEGORIES,
+        right=False,  # faixas fechadas à esquerda: 7,0 já é neutro e 9,0 já é promotor
+    )
