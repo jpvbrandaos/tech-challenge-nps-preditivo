@@ -128,6 +128,13 @@ O briefing e o dicionário de dados deixam pontos em aberto sobre a base. Cada u
 | P4 | Só tem nota quem respondeu à pesquisa, e as conclusões valem para quem responde | Briefing: o NPS é coletado "após o encerramento da jornada de compra", sem dizer quem é convidado | Etapa 3: notas ausentes em `nps_score` |
 | P5 | A base é tratada como registro real da operação. Com sinais de simulação, as conclusões passam a valer como demonstração de método | A base não identifica a empresa nem informa como os pedidos foram selecionados | Etapa 3: distribuições e relações regulares demais |
 
+**Resultado na Etapa 3.** As verificações do [notebook de qualidade](../notebooks/01_qualidade_e_tratamento.ipynb) confirmaram uma premissa e revisaram três:
+
+- **P2, revista:** cada cliente tem um único pedido, então a premissa não pode ser testada pela repetição entre pedidos do mesmo cliente. Reclamações e tempo de resolução não se encaixam como registros dos contatos do pedido e passam a ser lidos como registros independentes ([D-09](registro_decisoes.md#d-09-registros-de-atendimento-lidos-como-independentes)).
+- **P3, revista:** o atraso supera o tempo de entrega em parte dos pedidos. O tempo de entrega passa a ser lido como previsão, e o atraso, como os dias além dela ([D-07](registro_decisoes.md#d-07-tempo-de-entrega-lido-como-previsão)).
+- **P4, confirmada:** nenhuma nota ausente. A base traz só quem respondeu, e o viés de não resposta não pode ser medido nela.
+- **P5, revista:** distribuições planas e relações esperadas ausentes indicam base simulada, e as conclusões passam a valer como demonstração de método ([D-10](registro_decisoes.md#d-10-base-tratada-como-simulada)).
+
 As premissas sobre o uso das variáveis no modelo, como o momento de coleta do CSAT e as notas com casa decimal, ficam na definição da target (Etapa 2).
 
 **Restrições**
@@ -160,7 +167,7 @@ Cada hipótese pode ser confirmada ou derrubada pela base e traz o mecanismo que
 | H5 | Frete caro somado a atraso é a combinação que mais gera detratores | Quem paga mais pelo frete paga pelo prazo, e o atraso quebra o que foi pago | % de detratores por frete relativo ao valor do pedido × atraso | Devolver o frete quando o pedido atrasar | Média |
 | H6 | Desconto não compensa falha operacional | O desconto pesa na compra; a nota reflete a entrega, que vem depois | % de detratores por faixa de desconto, só em pedidos com falha | Corrigir a causa em vez de oferecer cupom genérico | Média |
 | H7 | Diferenças de NPS entre regiões vêm da logística, não do perfil regional | Regiões mais distantes têm prazos maiores e mais atrasos | % de detratores por região dentro da mesma faixa de atraso | Tratar como problema de malha logística e de SLA por região | Alta |
-| H8 | Falhas acumuladas no mesmo pedido pesam mais que a soma das falhas isoladas | Uma falha costuma ser perdoada; a segunda confirma que a loja não é confiável | % de detratores pelo número de falhas no pedido (atraso, nova tentativa, reclamação, resolução longa), para ver se o risco acelera | Acionar recuperação quando o pedido acumular a segunda falha | Alta |
+| H8 | Falhas acumuladas no mesmo pedido pesam mais que a soma das falhas isoladas | Uma falha costuma ser perdoada; a segunda confirma que a loja não é confiável | % de detratores pelo número de falhas no pedido (atraso, nova tentativa, contato com o atendimento, resolução longa; D-09), para ver se o risco acelera | Acionar recuperação quando o pedido acumular a segunda falha | Alta |
 | H9 | Uma parcela dos detratores não teve nenhuma falha registrada na base | Há causas que a base não mede, como produto, expectativa e preço | % de detratores sem falha de entrega ou atendimento; o teste é parcial, porque a causa não aparece | Registrar produto, categoria e motivo da nota | Média |
 
 Na análise exploratória (Etapa 4), cada hipótese termina como confirmada, refutada ou inconclusiva, com o número que sustenta o veredito.
