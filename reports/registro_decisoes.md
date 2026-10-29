@@ -91,3 +91,12 @@ Decisões que afetam escopo, dados, métricas ou método do projeto. Cada entrad
 - **Alternativas consideradas:** tratar a base como registro real; mencionar o alcance apenas nas limitações do README.
 - **Justificativa:** recomendações apresentadas como fatos de uma operação que a base não representa levariam a decisões sem sustentação. Declarar o alcance preserva o que o trabalho tem de valor: o diagnóstico, as hipóteses, o modelo e a forma de avaliá-lo.
 - **Consequências:** o README e a apresentação declaram o alcance. A análise exploratória descreve padrões desta base sem estendê-los ao e-commerce, e as recomendações saem como hipóteses a validar com dados reais. Relações ausentes, como as do valor do pedido, não são lidas como falta de efeito na operação real.
+
+## D-11: Teste separado antes da análise exploratória
+
+- **Status:** aceita em 29/10/2026
+- **Contexto:** a análise exploratória escolhe faixas, cortes e regras simples, e a D-03 compara o modelo com a melhor dessas regras. Escolhidos com a base inteira, cortes e regras carregariam informação dos pedidos que depois medem o desempenho final, e a comparação ficaria otimista.
+- **Decisão:** 20% dos pedidos formam o conjunto de teste, sorteados com semente fixa e estratificados pela variável-alvo por `src/split.py`, antes da análise exploratória. A análise e as escolhas que saem dela usam só o treino; o teste fica reservado para a avaliação final do modelo e das regras simples.
+- **Alternativas consideradas:** explorar a base inteira e separar o teste só na modelagem; separar treino e teste por cliente.
+- **Justificativa:** uma regra ajustada aos pedidos de teste parece melhor do que é, e o modelo passaria a ser comparado com uma referência inflada. A separação por cliente não muda nada nesta base, em que cada cliente tem um único pedido (seção 2.1 do [notebook de qualidade](../notebooks/01_qualidade_e_tratamento.ipynb)). A estratificação mantém a mesma proporção de detratores nos dois conjuntos.
+- **Consequências:** os números da análise exploratória descrevem o treino, com 80% dos pedidos. A modelagem usa a mesma separação, pela mesma função, e a validação cruzada roda só no treino. Com 2.500 pedidos, o teste tem 500, o que limita a precisão das métricas finais: cada uma sai com intervalo de confiança.
