@@ -1,4 +1,4 @@
-"""Regras de qualidade da base tratada, gerada pelo notebook 01."""
+"""Regras de qualidade da base tratada, gerada por python -m src.features."""
 
 import pandas as pd
 import pytest
@@ -21,7 +21,7 @@ AT_LEAST_ONE = ["items_quantity", "delivery_attempts", "payment_installments"]
 @pytest.fixture(scope="module")
 def processed():
     if not PROCESSED_DATA_FILE.exists():
-        pytest.skip("Base tratada ausente: rode o notebook 01 para gerá-la")
+        pytest.skip("Base tratada ausente: rode python -m src.features")
     return pd.read_csv(PROCESSED_DATA_FILE)
 
 
