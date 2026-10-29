@@ -1,7 +1,16 @@
-"""Atributos de negócio da base de pedidos."""
+"""Atributos de negócio da base de pedidos e geração da base tratada."""
 
+from pathlib import Path
+
+from loguru import logger
 import numpy as np
 import pandas as pd
+import typer
+
+from src.config import PROCESSED_DATA_FILE
+from src.dataset import download_raw_data
+
+app = typer.Typer()
 
 # Faixas do NPS aplicadas direto sobre a nota, sem arredondar (D-05)
 DETRACTOR_BELOW = 7
@@ -34,6 +43,14 @@ FEATURE_COLUMNS = [
     "age_bucket",
     "friction_score",
 ]
+
+# Ordem das faixas, que o CSV não guarda
+CATEGORY_ORDERS = {
+    "nps_category": NPS_CATEGORIES,
+    "delay_bucket": DELAY_LABELS,
+    "tenure_bucket": TENURE_LABELS,
+    "age_bucket": AGE_LABELS,
+}
 
 
 def classify_nps(score: pd.Series) -> pd.Series:
@@ -76,3 +93,26 @@ def build_features(raw: pd.DataFrame) -> pd.DataFrame:
         data["is_late"] + data["multiple_attempts"] + data["had_contact"] + long_resolution
     )
     return data
+
+
+def load_processed_data(path: Path = PROCESSED_DATA_FILE) -> pd.DataFrame:
+    """Lê a base tratada e devolve as faixas como categorias ordenadas."""
+    if not path.exists():
+        raise FileNotFoundError("Base tratada ausente: rode python -m src.features")
+    data = pd.read_csv(path)
+    for column, order in CATEGORY_ORDERS.items():
+        data[column] = pd.Categorical(data[column], categories=order, ordered=True)
+    return data
+
+
+@app.command()
+def main() -> None:
+    """Gera a base tratada a partir da base bruta conferida."""
+    processed = build_features(pd.read_csv(download_raw_data()))
+    PROCESSED_DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+    processed.to_csv(PROCESSED_DATA_FILE, index=False)
+    logger.success(f"Base tratada salva com {len(processed)} pedidos")
+
+
+if __name__ == "__main__":
+    app()
