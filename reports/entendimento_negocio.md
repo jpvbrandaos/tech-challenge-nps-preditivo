@@ -4,8 +4,6 @@
 
 A empresa só mede a satisfação depois do fim da jornada de compra, quando a falha já aconteceu e o cliente já formou opinião sobre a loja. O projeto ataca o problema em duas frentes. A primeira identifica as falhas de entrega e atendimento que mais geram detratores. A segunda estima, logo após a entrega, o risco de cada cliente se tornar detrator, a tempo de agir. O foco é o detrator: recuperar um pesa no NPS tanto quanto conquistar um promotor, e é nele que se espera achar uma falha que a operação consegue corrigir. O sucesso se mede pela queda da proporção de detratores num piloto com grupo de controle, sem aumento do custo de atendimento e sem queda na taxa de resposta da pesquisa.
 
-Marcações como `[linha de base: Etapa 4]` indicam números que dependem da análise dos dados e serão preenchidos na etapa indicada.
-
 ## 1. O problema de negócio
 
 A empresa cresceu em pedidos, entregas e contatos com clientes, e o NPS passou a variar muito entre perfis de consumidores. Clientes com indicadores operacionais parecidos terminam ora promotores, ora detratores. A empresa só descobre o resultado quando a pesquisa é respondida, depois do encerramento da jornada, e aí a experiência daquele pedido já não tem conserto. A área de Experiência do Cliente não consegue agir antes de o cliente virar detrator porque só mede a satisfação no fim da jornada. Com isso, corrige falhas quando o cliente já decidiu se volta e o que vai dizer da loja. A decisão em aberto é em quais falhas agir primeiro, e em quais pedidos, para reduzir detratores antes da pesquisa.
@@ -23,7 +21,7 @@ São dois problemas encadeados. O diagnóstico pergunta quais fatores operaciona
 
 ## 2. Metas e critérios de sucesso
 
-**Meta de negócio.** Reduzir a proporção de detratores de `[linha de base: Etapa 4]` para `[alvo: Etapa 4]` em dois trimestres a partir do início do piloto, sem piorar as métricas de proteção. O NPS geral é acompanhado junto, mas a meta é a proporção de detratores, que as ações propostas movem diretamente.
+**Meta de negócio.** Reduzir a proporção de detratores de 84,4% para 74,4%, uma queda de 10 pontos, em dois trimestres a partir do início do piloto, sem piorar as métricas de proteção. O NPS geral é acompanhado junto, mas a meta é a proporção de detratores, que as ações propostas movem diretamente. A linha de base vem do treino da análise exploratória, e o alvo, da revisão que a encerrou ([D-15](registro_decisoes.md#d-15-alvos-do-modelo-e-da-meta-de-negócio)).
 
 **Meta analítica.** Entregar o diagnóstico das falhas operacionais associadas aos detratores, com peso e frequência de cada uma. E entregar um score de risco de detrator, calculado logo após a entrega, que supere o modelo ingênuo e a melhor regra simples da análise exploratória.
 
@@ -33,10 +31,10 @@ São dois problemas encadeados. O diagnóstico pergunta quais fatores operaciona
 | --- | --- | --- | --- |
 | Analítico | A análise exploratória responde às quatro perguntas de negócio: fatores críticos, causas de detratores, ponto de ruptura e perfis de cliente | Cada resposta com o número e o tamanho do grupo que a sustentam | Análise exploratória (Etapa 4) |
 | Analítico | Cada hipótese da seção 8 recebe um veredito | Confirmada, refutada ou inconclusiva, com o número que decide | Análise exploratória (Etapa 4) |
-| Modelo | O score supera o modelo ingênuo e a melhor regra simples | PR-AUC e % dos detratores que caem entre os 20% de maior risco, no mesmo conjunto de teste | Modelo (Etapa 6) |
+| Modelo | O score supera o modelo ingênuo e a regra de dias de atraso | ROC-AUC pelo menos 0,05 acima da regra, sem PR-AUC abaixo da dela, no mesmo conjunto de teste ([D-12](registro_decisoes.md#d-12-métricas-do-modelo-revistas-para-a-proporção-de-detratores) e [D-15](registro_decisoes.md#d-15-alvos-do-modelo-e-da-meta-de-negócio)) | Modelo (Etapa 6) |
 | Negócio | Agir nos clientes de risco reduz a proporção de detratores | Comparação com um grupo de controle sorteado | Piloto, depois do projeto |
 
-Os alvos numéricos dependem da proporção de detratores na base, que define o desempenho do modelo ingênuo. Por isso, são fixados ao fim da análise exploratória, antes do treino de qualquer modelo. O corte de 20% supõe a capacidade de contato do atendimento e precisa ser validado com a área.
+Os alvos numéricos dependiam da proporção de detratores na base, que define o desempenho do modelo ingênuo, e por isso foram fixados ao fim da análise exploratória, antes do treino de qualquer modelo. Com o detrator como grande maioria, a lista dos 20% de maior risco deixou de separar modelos, e a métrica principal passou a ser a ROC-AUC ([D-12](registro_decisoes.md#d-12-métricas-do-modelo-revistas-para-a-proporção-de-detratores)). O corte de 20% segue como a capacidade de contato do atendimento, a validar com a área.
 
 **Métricas de proteção**, que não podem piorar enquanto a meta melhora:
 
@@ -89,7 +87,7 @@ Cada elo é uma associação esperada, não uma causa comprovada. A base permite
 
 **Market share.** Com a troca de loja a um clique, a participação de mercado tende a migrar para quem retém mais clientes e recebe mais indicações. Por isso o que conta é o NPS da empresa em relação ao dos concorrentes que disputam o mesmo cliente, não o número isolado. Reichheld (2003) defende a ligação entre recomendação e crescimento, e Keiningham et al. (2007) não a encontram com a força alegada, o que mantém esse elo como hipótese a acompanhar.
 
-**Evidência na base:** recompra em 30 dias por categoria de NPS, `[resultado: Etapa 4]`.
+**Evidência na base:** na [seção 2 da análise exploratória](../notebooks/02_eda.ipynb), nenhum detrator recompra em até 30 dias, contra 41,7% dos neutros e todos os promotores. A separação confirma o elo entre NPS e recompra nesta base, mas é exata demais para comportamento real e conta como mais um sinal de base simulada ([D-10](registro_decisoes.md#d-10-base-tratada-como-simulada)).
 
 ## 6. Indicadores de mercado complementares
 
@@ -171,6 +169,18 @@ Cada hipótese pode ser confirmada ou derrubada pela base e traz o mecanismo que
 | H9 | Uma parcela dos detratores não teve nenhuma falha registrada na base | Há causas que a base não mede, como produto, expectativa e preço | % de detratores sem falha de entrega ou atendimento; o teste é parcial, porque a causa não aparece | Registrar produto, categoria e motivo da nota | Média |
 
 Na análise exploratória (Etapa 4), cada hipótese termina como confirmada, refutada ou inconclusiva, com o número que sustenta o veredito.
+
+**Resultado na Etapa 4.** Na [seção 9 da análise exploratória](../notebooks/02_eda.ipynb), com os pedidos de treino, as hipóteses tiveram estes vereditos:
+
+- **H1, confirmada no crescimento e refutada no salto:** com 5 dias de atraso ou mais, a proporção de detratores fica 49 pontos acima da dos pedidos no prazo (intervalo de 42 a 56), e o modelo em que o risco cresce a cada dia vence o de um corte único por 102 pontos de AIC.
+- **H2, inconclusiva:** nos pedidos sem atraso, a nova tentativa muda a proporção de detratores em menos de 1 ponto, mas com intervalo de −14 a 14 e grupo de 77 pedidos.
+- **H3, refutada:** com o número de contatos fixo, o efeito da resolução longa fica 3 pontos abaixo do de dois contatos ou mais (intervalo de −7 a 1).
+- **H4, refutada:** o efeito do atraso nos clientes de até 1 ano fica 5 pontos abaixo do efeito nos clientes de mais de 5 anos (intervalo de −14 a 4).
+- **H5, refutada:** o efeito do atraso no maior quartil de frete fica 8 pontos abaixo do efeito no menor (intervalo de −16 a −1).
+- **H6, confirmada:** nos pedidos com falha, o menor e o maior desconto diferem em 0,3 ponto de detratores (intervalo de −4,7 a 4,4).
+- **H7, inconclusiva:** as regiões ficam entre 82% e 86% de detratores (seção 8) e não diferem nem antes do ajuste pelo atraso, então não há diferença para a logística explicar.
+- **H8, refutada:** nos pedidos com duas falhas ou mais, os detratores ficam 0,1 ponto abaixo do previsto pela soma das falhas isoladas (intervalo de −0,5 a 0,3).
+- **H9, refutada:** 0,1% dos detratores não passou por nenhuma das quatro falhas (intervalo de 0,03% a 0,4%), contra o mínimo de 10% da hipótese. Como quase todo pedido tem alguma falha, o teste não descarta causas que a base não mede.
 
 ## Glossário
 

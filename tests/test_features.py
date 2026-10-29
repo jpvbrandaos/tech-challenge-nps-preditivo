@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from src.features import FEATURE_COLUMNS, build_features, classify_nps
+from src.features import FEATURE_COLUMNS, build_features, classify_nps, load_processed_data
 
 
 @pytest.mark.parametrize(
@@ -89,3 +89,17 @@ def test_tenure_and_age_buckets_include_the_upper_limit(orders):
     features = build_features(orders)
     assert features["tenure_bucket"].astype(str).tolist() == ["até 1 ano", "mais de 5 anos"]
     assert features["age_bucket"].astype(str).tolist() == ["18 a 24", "55 ou mais"]
+
+
+def test_processed_data_keeps_the_order_of_each_band(orders, tmp_path):
+    path = tmp_path / "base_tratada.csv"
+    build_features(orders).to_csv(path, index=False)
+    loaded = load_processed_data(path)
+    assert loaded["delay_bucket"].cat.ordered
+    assert loaded["delay_bucket"].cat.categories.tolist()[0] == "sem atraso"
+    assert loaded["nps_category"].astype(str).tolist() == ["detrator", "promotor"]
+
+
+def test_missing_processed_data_points_to_the_command(tmp_path):
+    with pytest.raises(FileNotFoundError, match="python -m src.features"):
+        load_processed_data(tmp_path / "ausente.csv")

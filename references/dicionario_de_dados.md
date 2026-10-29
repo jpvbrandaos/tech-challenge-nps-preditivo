@@ -34,7 +34,7 @@ A base é tratada como simulada, e as conclusões valem como demonstração de m
 
 ## Atributos da base tratada
 
-Calculados por `build_features`, em [`src/features.py`](../src/features.py), e salvos em `data/processed/base_tratada.csv` pelo notebook 01. As faixas são fechadas à direita: 2 dias de atraso caem em "1 a 2 dias".
+Calculados por `build_features`, em [`src/features.py`](../src/features.py), e salvos em `data/processed/base_tratada.csv` pelo comando `python -m src.features`. As faixas são fechadas à direita: 2 dias de atraso caem em "1 a 2 dias".
 
 | Atributo | Definição | Pergunta que responde |
 | --- | --- | --- |

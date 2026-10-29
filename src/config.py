@@ -40,5 +40,8 @@ RAW_DATA_URL = (
 RAW_DATA_FILE = RAW_DATA_DIR / "desafio_nps_fase_1.csv"
 RAW_DATA_SHA256 = "cc97b3ebb94ed7251c2ae37ee813381207023e8ef1b0cd32c339844c4347b42b"
 
-# Base tratada: gerada pelo notebook 01 e mantida fora do Git, como a base bruta (D-01)
+# Base tratada: gerada por python -m src.features e mantida fora do Git, como a base bruta (D-01)
 PROCESSED_DATA_FILE = PROCESSED_DATA_DIR / "base_tratada.csv"
+
+# Fração da base reservada para o teste, separada antes da análise exploratória (D-11)
+TEST_SIZE = 0.2
