@@ -1,6 +1,6 @@
 # NPS Preditivo
 
-Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS. O diagnóstico da base está concluído: os dados são íntegros, mas têm sinais claros de simulação, e as conclusões valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)). A análise exploratória e o modelo de risco vêm nas próximas etapas.
+Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS. O diagnóstico da base está concluído: os dados são íntegros, mas têm sinais claros de simulação, e as conclusões valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)). Na análise exploratória, o atraso aparece como a falha que mais pesa: metade dos clientes que recebem no prazo é detratora, contra quase todos a partir de três dias de atraso. O modelo de risco vem na próxima etapa.
 
 ## Objetivo
 
@@ -30,7 +30,9 @@ O dicionário de dados, disponível em [`references/dicionario_de_dados.md`](ref
 
 - **Base tratada**
 
-O notebook 01 gera `data/processed/base_tratada.csv`, com todos os pedidos e colunas originais e os atributos de negócio de `src/features.py`. Como a base bruta, ela fica fora do Git e é recriada a cada execução do notebook.
+O comando `python -m src.features` gera `data/processed/base_tratada.csv`, com todos os pedidos e colunas originais e os atributos de negócio de `src/features.py`. Como a base bruta, ela fica fora do Git.
+
+Antes da análise exploratória, `src/split.py` reserva 20% dos pedidos para o teste final, sorteados com semente fixa e com a mesma proporção de detratores do treino ([D-11](reports/registro_decisoes.md#d-11-teste-separado-antes-da-análise-exploratória)).
 
 
 ## Metodologia
@@ -40,6 +42,7 @@ O projeto segue as fases do CRISP-DM, cada uma com um documento ou notebook pró
 1. [Entendimento do negócio](reports/entendimento_negocio.md): problema, metas e critérios de sucesso, premissas e hipóteses.
 2. [Definição da variável-alvo](reports/definicao_target.md): escolha da variável, regra de classificação, variáveis permitidas no modelo e riscos de uso.
 3. [Qualidade e preparação dos dados](notebooks/01_qualidade_e_tratamento.ipynb): diagnóstico da base, decisões de tratamento e base tratada com os atributos de negócio.
+4. [Análise exploratória](notebooks/02_eda.ipynb): fatores associados aos detratores, pontos de ruptura, interações, perfis de cliente, veredito das hipóteses e referências para o modelo, só com os pedidos de treino (D-11).
 
 ## Principais Resultados
 
@@ -50,6 +53,17 @@ O projeto segue as fases do CRISP-DM, cada uma com um documento ou notebook pró
 - Distribuições planas e relações esperadas ausentes indicam base simulada, e as conclusões do projeto valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)).
 - O detrator é a grande maioria: 84,4% dos pedidos pelo corte direto da D-05, com NPS de −80,0. O arredondamento levaria a 79,0% e −72,8, sem mudar a conclusão.
 
+### Análise exploratória
+
+Números do treino, com 2.000 pedidos, na [análise exploratória](notebooks/02_eda.ipynb):
+
+- **Fatores críticos:** só fatores de entrega e atendimento se associam aos detratores, com reclamações (V de Cramér de 0,42) e atraso (0,39) à frente; perfil do cliente e condições do pedido não mostram associação depois da correção de Holm (seção 4).
+- **O que mais gera detratores:** o atraso alcança 93% dos detratores e leva a proporção de detratores de 51% nos pedidos no prazo para 89% nos atrasados; mesmo sem atraso, o contato com o atendimento soma 39 pontos de detratores (seção 5).
+- **Ponto de ruptura:** não há um limite tolerado. O modelo em que o risco cresce a cada dia de atraso vence o de um corte único por 102 pontos de AIC, e quase todos os clientes são detratores a partir de três dias (seção 6).
+- **Perfis de cliente:** região, idade, tempo de relacionamento, valor do pedido e parcelamento ficam todos entre 81% e 89% de detratores, sem diferença que resista à correção (seções 4 e 8).
+- **Hipóteses:** H1 confirmada no crescimento do risco com o atraso e refutada no salto; H6 confirmada; H3, H4, H5, H8 e H9 refutadas; H2 e H7 inconclusivas (seção 9).
+- **Tamanho da oportunidade:** se os pedidos atrasados tivessem a mistura de notas dos pedidos no prazo, o NPS iria de −79,8 para −32,4, um ganho de 47 pontos com intervalo de 38 a 57, como teto otimista (seção 10).
+
 ## Estrutura do Repositório
 
 Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/).
@@ -57,24 +71,27 @@ Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-scien
 ```
 ├── data/                        # fora do Git (D-01)
 │   ├── raw/                     # base original, baixada por python -m src.dataset
-│   └── processed/               # base tratada, gerada pelo notebook 01
+│   └── processed/               # base tratada, gerada por python -m src.features
 ├── models/                      # modelo treinado, na etapa de modelagem
 ├── notebooks/
-│   └── 01_qualidade_e_tratamento.ipynb
+│   ├── 01_qualidade_e_tratamento.ipynb
+│   └── 02_eda.ipynb
 ├── references/
 │   └── dicionario_de_dados.md
 ├── reports/
 │   ├── entendimento_negocio.md
 │   ├── definicao_target.md
 │   ├── registro_decisoes.md
-│   └── figures/
+│   └── figures/                 # figuras da análise exploratória, usadas nos slides
 ├── src/
-│   ├── config.py                # caminhos, semente e fonte da base
+│   ├── config.py                # caminhos, semente, fonte da base e tamanho do teste
 │   ├── dataset.py               # download da base e conferência do SHA-256
-│   ├── features.py              # atributos de negócio da base tratada
-│   ├── plots.py                 # gráficos, na análise exploratória
+│   ├── features.py              # atributos de negócio e geração da base tratada
+│   ├── split.py                 # separação de treino e teste (D-11)
+│   ├── analysis.py              # proporções, efeitos e vereditos da análise exploratória
+│   ├── plots.py                 # gráficos da análise exploratória
 │   └── modeling/                # treino e predição, na etapa de modelagem
-├── tests/                       # download, atributos e qualidade da base tratada
+├── tests/                       # download, atributos, base tratada, separação e análise
 ├── LICENSE
 ├── Makefile
 ├── pyproject.toml
@@ -92,8 +109,9 @@ Requer Python 3.13 e Git.
    - Linux ou macOS: `python3.13 -m venv .venv` e `source .venv/bin/activate`
 3. Instale as dependências: `pip install -r requirements.txt`
 4. Baixe a base e confira a integridade: `python -m src.dataset`. Na primeira vez o comando precisa de internet; depois, ele só confere o arquivo.
-5. Execute os notebooks na ordem numérica, do início ao fim.
-6. Rode os testes: `python -m pytest tests`. Os testes da base tratada pedem o notebook 01 já executado.
+5. Gere a base tratada: `python -m src.features`.
+6. Execute os notebooks na ordem numérica, do início ao fim.
+7. Rode os testes: `python -m pytest tests`. Os testes da base tratada pedem o passo 5.
 
 
 ## Registro de Decisões
@@ -105,7 +123,8 @@ As decisões do projeto, com contexto, alternativas consideradas, justificativa 
 - **Base simulada.** As conclusões valem como demonstração de método, e não como retrato de uma operação real (D-10).
 - **Não resposta.** A base traz só quem respondeu à pesquisa, e o viés de não resposta não pode ser medido.
 - **Atendimento.** Reclamações e tempo de resolução não se vinculam com segurança ao pedido avaliado (D-09).
-- **Próximos passos.** Análise exploratória das hipóteses H1 a H9 e, depois, o modelo de risco.
+- **Associação.** Os achados da análise exploratória descrevem associação, e não causa; o efeito de cada ação só se confirma em piloto com grupo de controle.
+- **Próximos passos.** Modelo de risco de detrator, avaliado no teste reservado antes da análise exploratória (D-11), contra o modelo ingênuo e a regra simples de referência.
 
 As premissas, restrições e riscos completos estão na [seção 7 do entendimento do negócio](reports/entendimento_negocio.md#7-premissas-restrições-e-riscos).
 
