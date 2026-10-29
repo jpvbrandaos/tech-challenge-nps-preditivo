@@ -22,7 +22,7 @@ Decisões que afetam escopo, dados, métricas ou método do projeto. Cada entrad
 
 ## D-03: Critérios de sucesso fixados antes da análise
 
-- **Status:** aceita em 26/10/2026
+- **Status:** aceita em 26/10/2026; métricas substituídas pela [D-12](#d-12-métricas-do-modelo-revistas-para-a-proporção-de-detratores) em 29/10/2026
 - **Contexto:** métricas e limiares escolhidos depois de ver os resultados tendem a se ajustar a eles, o que compromete a avaliação.
 - **Decisão:** os critérios de sucesso ficam registrados na [seção 2 do entendimento do negócio](entendimento_negocio.md#2-metas-e-critérios-de-sucesso) antes de qualquer análise. O modelo é avaliado por PR-AUC e pela proporção de detratores capturados entre os 20% de maior risco, sempre contra o modelo ingênuo e a melhor regra simples da análise exploratória. Os valores-alvo são fixados ao fim da análise exploratória, antes do treino de qualquer modelo.
 - **Alternativas consideradas:** definir métricas e alvos depois da modelagem; usar acurácia ou ROC-AUC como métrica principal.
@@ -100,3 +100,48 @@ Decisões que afetam escopo, dados, métricas ou método do projeto. Cada entrad
 - **Alternativas consideradas:** explorar a base inteira e separar o teste só na modelagem; separar treino e teste por cliente.
 - **Justificativa:** uma regra ajustada aos pedidos de teste parece melhor do que é, e o modelo passaria a ser comparado com uma referência inflada. A separação por cliente não muda nada nesta base, em que cada cliente tem um único pedido (seção 2.1 do [notebook de qualidade](../notebooks/01_qualidade_e_tratamento.ipynb)). A estratificação mantém a mesma proporção de detratores nos dois conjuntos.
 - **Consequências:** os números da análise exploratória descrevem o treino, com 80% dos pedidos. A modelagem usa a mesma separação, pela mesma função, e a validação cruzada roda só no treino. Com 2.500 pedidos, o teste tem 500, o que limita a precisão das métricas finais: cada uma sai com intervalo de confiança.
+
+## D-12: Métricas do modelo revistas para a proporção de detratores
+
+- **Status:** aceita em 29/10/2026; substitui as métricas da [D-03](#d-03-critérios-de-sucesso-fixados-antes-da-análise)
+- **Contexto:** a D-03 escolheu PR-AUC e captura entre os 20% de maior risco supondo o detrator como minoria. No treino, ele é 84,4% dos pedidos (seção 1 da [análise exploratória](../notebooks/02_eda.ipynb)): o modelo ingênuo já tem PR-AUC de 0,844, e a captura no topo de 20% não passa de 23,7%. Na seção 11, a regra de dias de atraso chega a 23,6% de captura e 99,5% de precisão no topo, praticamente o máximo, enquanto a ROC-AUC dela fica em 0,803.
+- **Decisão:** a ROC-AUC passa a ser a métrica principal do modelo, e a PR-AUC fica como métrica de apoio, sempre lida contra a do modelo ingênuo. Captura e precisão no topo de 20% continuam reportadas para descrever a lista, sem peso na decisão.
+- **Alternativas consideradas:** manter as métricas da D-03; medir a PR-AUC da classe minoritária, a dos não detratores.
+- **Justificativa:** com o detrator como maioria, PR-AUC e captura no topo ficam espremidas entre o modelo ingênuo e o teto, e uma regra de uma variável já esgota a captura: as duas deixam de separar um bom modelo de uma regra simples. A ROC-AUC não depende da proporção de detratores e mede a ordenação da base inteira, onde ainda há margem. O argumento da D-03 contra ela supunha detratores raros. A PR-AUC dos não detratores teria margem, mas mede a lista de quem não precisa de ação, o contrário do uso previsto para o score.
+- **Consequências:** a D-03 segue valendo com estas métricas, e o critério do modelo na [seção 2 do entendimento do negócio](entendimento_negocio.md#2-metas-e-critérios-de-sucesso) é atualizado. Os alvos ficam na [D-15](#d-15-alvos-do-modelo-e-da-meta-de-negócio).
+
+## D-13: Variável-alvo mantida como detrator contra os demais
+
+- **Status:** aceita em 29/10/2026
+- **Contexto:** com 84,4% de detratores no treino, a classe positiva é a maioria (seção 1 da [análise exploratória](../notebooks/02_eda.ipynb)). Neutros são 11,2% e promotores, 4,5%, ou 90 pedidos (seção 2).
+- **Decisão:** o modelo segue com `is_detractor`, detrator contra neutros e promotores, pela regra da D-05.
+- **Alternativas consideradas:** três classes, de detrator a promotor; prever a nota; baixar o corte de detrator para torná-lo minoria.
+- **Justificativa:** a meta de negócio é a proporção de detratores (D-02), e é ela que o score precisa ordenar. Com 90 promotores no treino, e cerca de 20 no teste, um modelo de três classes teria uma classe pequena demais para ser avaliada. Prever a nota trata a escala como contínua, o que a D-02 descarta, e mudar o corte trocaria a pergunta de negócio para caber na métrica. Com a ROC-AUC (D-12), a classe positiva não precisa ser minoria.
+- **Consequências:** a regra da [definição da variável-alvo](definicao_target.md) não muda.
+
+## D-14: Dias de atraso como regra de referência
+
+- **Status:** aceita em 29/10/2026
+- **Contexto:** a D-03 compara o modelo com a melhor regra simples da análise exploratória. Na seção 11 da [análise exploratória](../notebooks/02_eda.ipynb), ordenar os clientes por dias de atraso supera o modelo ingênuo e as outras regras em todas as métricas, com ROC-AUC de 0,803 e PR-AUC de 0,944. A árvore rasa, medida por validação cruzada, chega a 0,803 e 0,939 sem superá-la, e as falhas acumuladas ficam em 0,705 e 0,907.
+- **Decisão:** a regra de referência é a ordenação por dias de atraso. O modelo é comparado com ela e com o modelo ingênuo no mesmo conjunto de teste.
+- **Alternativas consideradas:** a árvore rasa; o número de falhas acumuladas.
+- **Justificativa:** é a regra mais simples e a de melhor desempenho, e a operação pode aplicá-la sem modelo, com um dado que já tem logo após a entrega. A árvore usa duas variáveis sem ganho, e as falhas acumuladas somam a nova tentativa, que não muda o risco (seção 5).
+- **Consequências:** se o modelo não superar a regra pelos alvos da [D-15](#d-15-alvos-do-modelo-e-da-meta-de-negócio), a recomendação passa a ser priorizar os clientes por dias de atraso.
+
+## D-15: Alvos do modelo e da meta de negócio
+
+- **Status:** aceita em 29/10/2026
+- **Contexto:** a D-03 fixa os alvos ao fim da análise exploratória, antes de qualquer treino. A regra de dias de atraso tem ROC-AUC de 0,803 no treino (seção 11 da [análise exploratória](../notebooks/02_eda.ipynb)). Na seção 10, se os pedidos atrasados tivessem a mistura de notas dos pedidos no prazo, o NPS iria de −79,8 para −32,4, e a proporção de detratores cairia de 84,4% para a dos pedidos no prazo, 50,9% (seção 5): um teto otimista.
+- **Decisão:** o modelo supera a referência se a ROC-AUC no teste ficar pelo menos 0,05 acima da regra de dias de atraso, medida no mesmo teste, com o intervalo de confiança da diferença acima de zero, e se a PR-AUC não ficar abaixo da dela. A meta de negócio é reduzir a proporção de detratores de 84,4% para 74,4%, uma queda de 10 pontos, em dois trimestres de piloto, medida contra o grupo de controle.
+- **Alternativas consideradas:** exigir só que o modelo supere a regra, sem margem; fixar a meta de negócio no teto da seção 10.
+- **Justificativa:** ganhos menores que 0,05 de ROC-AUC sobre uma regra de uma variável não pagam a complexidade de manter um modelo, e com 500 pedidos no teste ficam dentro da incerteza da medida (D-11). A meta de 10 pontos equivale a cerca de um terço da queda que o teto da seção 10 permite. O teto supõe que o atraso explique toda a diferença entre pedidos atrasados e no prazo e que todo atraso desapareça, e nenhuma das duas coisas é realista em dois trimestres.
+- **Consequências:** a [seção 2 do entendimento do negócio](entendimento_negocio.md#2-metas-e-critérios-de-sucesso) recebe a linha de base e o alvo. Os alvos só mudam por nova decisão, tomada antes de a Etapa 6 olhar o teste.
+
+## D-16: Modelagem mantida, com ganho exigido sobre a regra
+
+- **Status:** aceita em 29/10/2026
+- **Contexto:** o sinal existe e está concentrado. Reclamações, atraso, contatos e tempo de resolução são os únicos fatores associados aos detratores depois da correção de Holm, com V de Cramér de 0,15 a 0,42, e o perfil do cliente não mostra associação (seções 4 e 8 da [análise exploratória](../notebooks/02_eda.ipynb)). Na seção 9, o atraso de 5 dias ou mais soma 49 pontos de detratores (H1a), e na seção 11 uma regra de uma variável já ordena bem os clientes.
+- **Decisão:** a modelagem segue com as variáveis da D-06 e precisa mostrar ganho sobre a regra de dias de atraso pelos alvos da [D-15](#d-15-alvos-do-modelo-e-da-meta-de-negócio). A Etapa 6 também mede o modelo sem `complaints_count`, como já previsto sem `resolution_time_days`.
+- **Alternativas consideradas:** encerrar o projeto na regra de dias de atraso, sem modelo; modelar sem exigir ganho sobre a regra.
+- **Justificativa:** reclamações, contatos e tempo de resolução carregam associação que o atraso não explica, como o efeito do contato nos pedidos sem atraso (seção 5), e só um modelo combina essas informações. A reclamação lidera o ranking, mas expressa a insatisfação em vez de originá-la, o risco de causalidade reversa da [definição da variável-alvo](definicao_target.md#4-riscos-de-uso-inadequado); medir o modelo sem ela mostra quanto do desempenho depende de um sinal tão próximo da própria nota.
+- **Consequências:** se o ganho sobre a regra vier quase todo de `complaints_count`, o resultado é apresentado com essa ressalva.
