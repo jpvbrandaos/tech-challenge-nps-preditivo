@@ -1,4 +1,4 @@
-"""Gráficos da análise exploratória, com o mesmo estilo em todas as figuras."""
+"""Gráficos da análise exploratória e da modelagem, com o mesmo estilo em todas as figuras."""
 
 from collections.abc import Iterable
 
@@ -6,8 +6,10 @@ from matplotlib.colors import TwoSlopeNorm
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import ArrayLike
 import pandas as pd
 import seaborn as sns
+from sklearn.metrics import roc_auc_score, roc_curve
 
 from src.analysis import MIN_GROUP_SIZE
 from src.config import FIGURES_DIR
@@ -16,6 +18,10 @@ ACCENT = "#3164A8"
 MUTED = "#B8C4D6"
 INK = "#2B2B2B"
 CATEGORY_COLORS = {"detrator": "#C0504D", "neutro": MUTED, "promotor": ACCENT}
+
+# Séries de modelo, em ordem fixa; o par foi conferido para daltonismo
+SERIES_COLORS = [ACCENT, "#EB6834"]
+CHANCE = "#9A9A9A"
 
 # Amplitude da escala de cor dos mapas de calor, em pontos acima e abaixo da média
 HEATMAP_SPAN = 20
@@ -245,3 +251,67 @@ def save_figure(fig: plt.Figure, name: str) -> None:
     """Salva a figura em reports/figures/, pronta para os slides."""
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIGURES_DIR / f"{name}.png", dpi=150, bbox_inches="tight")
+
+
+def plot_roc_curves(
+    y: ArrayLike,
+    scores: dict[str, ArrayLike],
+    reference: str | None = None,
+    ax: plt.Axes | None = None,
+    title: str | None = None,
+) -> plt.Axes:
+    """Curva ROC de cada ordenação dos mesmos pedidos, com a ROC-AUC na legenda.
+
+    Cada ponto da curva é uma lista: a fração dos detratores e a dos não detratores que entram
+    nela. Os modelos ganham as cores de SERIES_COLORS, na ordem; a ordenação `reference`, como a
+    regra de dias de atraso, vem tracejada, como as linhas de referência dos outros gráficos. A
+    diagonal pontilhada é o sorteio.
+    """
+    if len([name for name in scores if name != reference]) > len(SERIES_COLORS):
+        raise ValueError(f"No máximo {len(SERIES_COLORS)} modelos por gráfico, além da referência")
+    ax = ax or plt.subplots(figsize=(5, 5))[1]
+    colors = iter(SERIES_COLORS)
+    for name, score in scores.items():
+        fpr, tpr, _ = roc_curve(y, score)
+        style = {"color": INK, "ls": "--"} if name == reference else {"color": next(colors)}
+        ax.plot(fpr, tpr, lw=2, label=f"{name}: {roc_auc_score(y, score):.3f}", **style)
+    ax.plot([0, 1], [0, 1], color=CHANCE, lw=1, ls=":")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1.01)
+    ax.set_aspect("equal")
+    ax.set_xlabel("Fração dos não detratores na lista")
+    ax.set_ylabel("Fração dos detratores na lista")
+    ax.legend(title="ROC-AUC", frameon=False, loc="lower right")
+    if title:
+        ax.set_title(title)
+    return ax
+
+
+def plot_calibration(
+    table: pd.DataFrame, ax: plt.Axes | None = None, title: str | None = None
+) -> plt.Axes:
+    """Proporção observada de detratores contra o risco médio previsto, por faixa de risco.
+
+    Recebe a tabela de `evaluation.calibration_table`. Pontos sobre a diagonal indicam
+    probabilidades fiéis; acima dela, o modelo subestima o risco. As barras são o intervalo de
+    Wilson de 95% de cada faixa, e os eixos começam um pouco abaixo da menor faixa.
+    """
+    ax = ax or plt.subplots(figsize=(5, 5))[1]
+    predicted = table["% previsto"]
+    observed = table["% detratores"]
+    errors = [
+        (observed - table["IC inferior"]).clip(lower=0),
+        (table["IC superior"] - observed).clip(lower=0),
+    ]
+    low = max(0.0, min(predicted.min(), table["IC inferior"].min()) - 5)
+    ax.plot([low, 100], [low, 100], color=CHANCE, lw=1, ls=":")
+    ax.errorbar(predicted, observed, yerr=errors, fmt="none", ecolor=INK, capsize=3, lw=1)
+    ax.scatter(predicted, observed, s=45, color=ACCENT, zorder=3)
+    ax.set_xlim(low, 101)
+    ax.set_ylim(low, 101)
+    ax.set_aspect("equal")
+    ax.set_xlabel("Risco médio previsto (%)")
+    ax.set_ylabel("% detratores observados")
+    if title:
+        ax.set_title(title)
+    return ax

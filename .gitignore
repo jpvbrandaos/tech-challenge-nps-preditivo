@@ -1,6 +1,10 @@
 # Data
 /data/
 
+# Modelos treinados, gerados por python -m src.modeling.train
+/models/*
+!/models/.gitkeep
+
 # Mac OS-specific storage files
 .DS_Store
 
@@ -189,7 +193,3 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-
-
-# Pasta .vscode
-echo ".vscode/" >> .gitignore
