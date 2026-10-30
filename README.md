@@ -43,6 +43,7 @@ O projeto segue as fases do CRISP-DM, cada uma com um documento ou notebook pró
 2. [Definição da variável-alvo](reports/definicao_target.md): escolha da variável, regra de classificação, variáveis permitidas no modelo e riscos de uso.
 3. [Qualidade e preparação dos dados](notebooks/01_qualidade_e_tratamento.ipynb): diagnóstico da base, decisões de tratamento e base tratada com os atributos de negócio.
 4. [Análise exploratória](notebooks/02_eda.ipynb): fatores associados aos detratores, pontos de ruptura, interações, perfis de cliente, veredito das hipóteses e referências para o modelo, só com os pedidos de treino (D-11).
+5. [Estratégia preditiva](reports/estrategia_preditiva.md): pergunta do modelo, momento da predição, escolha entre regressão e classificação, plano de avaliação, uso do score pela empresa e piloto com grupo de controle.
 
 ## Principais Resultados
 
@@ -81,6 +82,7 @@ Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-scien
 ├── reports/
 │   ├── entendimento_negocio.md
 │   ├── definicao_target.md
+│   ├── estrategia_preditiva.md
 │   ├── registro_decisoes.md
 │   └── figures/                 # figuras da análise exploratória, usadas nos slides
 ├── src/
@@ -124,7 +126,7 @@ As decisões do projeto, com contexto, alternativas consideradas, justificativa 
 - **Não resposta.** A base traz só quem respondeu à pesquisa, e o viés de não resposta não pode ser medido.
 - **Atendimento.** Reclamações e tempo de resolução não se vinculam com segurança ao pedido avaliado (D-09).
 - **Associação.** Os achados da análise exploratória descrevem associação, e não causa; o efeito de cada ação só se confirma em piloto com grupo de controle.
-- **Próximos passos.** Modelo de risco de detrator, avaliado no teste reservado antes da análise exploratória (D-11), contra o modelo ingênuo e a regra simples de referência.
+- **Próximos passos.** Modelo de risco de detrator, pelo plano da [estratégia preditiva](reports/estrategia_preditiva.md), avaliado no teste reservado antes da análise exploratória (D-11) contra o modelo ingênuo e a regra de dias de atraso.
 
 As premissas, restrições e riscos completos estão na [seção 7 do entendimento do negócio](reports/entendimento_negocio.md#7-premissas-restrições-e-riscos).
 
