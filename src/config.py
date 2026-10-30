@@ -45,3 +45,7 @@ PROCESSED_DATA_FILE = PROCESSED_DATA_DIR / "base_tratada.csv"
 
 # Fração da base reservada para o teste, separada antes da análise exploratória (D-11)
 TEST_SIZE = 0.2
+
+# Modelo de risco e lista do dia: gerados por comando e mantidos fora do Git, como as bases
+MODEL_FILE = MODELS_DIR / "modelo_detrator.joblib"
+DAILY_LIST_FILE = PROCESSED_DATA_DIR / "lista_do_dia.csv"

@@ -46,3 +46,26 @@ def test_rate_limits_keep_every_point_in_view():
     low, high = plots.rate_limits([rate_table(data, "group")])
     shares = rate_table(data, "group")["% detratores"]
     assert low <= shares.min() and shares.max() <= high
+
+
+def test_plots_draw_roc_curves_and_calibration():
+    y = [0, 0, 1, 1, 1, 0, 1, 1]
+    scores = {
+        "modelo": [0.1, 0.4, 0.35, 0.8, 0.7, 0.2, 0.9, 0.6],
+        "regra": [0, 1, 1, 2, 2, 0, 3, 1],
+    }
+    ax = plots.plot_roc_curves(y, scores, reference="regra")
+    # Uma curva por ordenação, mais a diagonal do sorteio
+    assert len(ax.get_lines()) == 3
+    table = pd.DataFrame(
+        {
+            "pedidos": [50, 50],
+            "% previsto": [20.0, 60.0],
+            "% detratores": [25.0, 55.0],
+            "IC inferior": [15.0, 45.0],
+            "IC superior": [35.0, 65.0],
+        }
+    )
+    ax = plots.plot_calibration(table)
+    assert ax.get_xlim() == ax.get_ylim()
+    plt.close("all")

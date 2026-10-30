@@ -1,6 +1,6 @@
 # NPS Preditivo
 
-Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS. O diagnóstico da base está concluído: os dados são íntegros, mas têm sinais claros de simulação, e as conclusões valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)). Na análise exploratória, o atraso aparece como a falha que mais pesa: metade dos clientes que recebem no prazo é detratora, contra quase todos a partir de três dias de atraso. O modelo de risco vem na próxima etapa.
+Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS. O diagnóstico da base está concluído: os dados são íntegros, mas têm sinais claros de simulação, e as conclusões valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)). Na análise exploratória, o atraso aparece como a falha que mais pesa: metade dos clientes que recebem no prazo é detratora, contra quase todos a partir de três dias de atraso. O modelo de risco, uma regressão logística, supera no teste a regra de dias de atraso, com ROC-AUC de 0,869 contra 0,784, e o ganho é maior nos pedidos com até 2 dias de atraso, que ele ordena na lista diária de contato.
 
 ## Objetivo
 
@@ -44,6 +44,7 @@ O projeto segue as fases do CRISP-DM, cada uma com um documento ou notebook pró
 3. [Qualidade e preparação dos dados](notebooks/01_qualidade_e_tratamento.ipynb): diagnóstico da base, decisões de tratamento e base tratada com os atributos de negócio.
 4. [Análise exploratória](notebooks/02_eda.ipynb): fatores associados aos detratores, pontos de ruptura, interações, perfis de cliente, veredito das hipóteses e referências para o modelo, só com os pedidos de treino (D-11).
 5. [Estratégia preditiva](reports/estrategia_preditiva.md): pergunta do modelo, momento da predição, escolha entre regressão e classificação, plano de avaliação, uso do score pela empresa e piloto com grupo de controle.
+6. [Modelagem](notebooks/03_modelagem.ipynb): candidatos comparados por validação cruzada no treino, regressão da nota como comparação, robustez, calibração, erro por grupo e uma única avaliação no teste contra a regra de dias de atraso, resumidos no [model card](reports/model_card.md).
 
 ## Principais Resultados
 
@@ -65,6 +66,17 @@ Números do treino, com 2.000 pedidos, na [análise exploratória](notebooks/02_
 - **Hipóteses:** H1 confirmada no crescimento do risco com o atraso e refutada no salto; H6 confirmada; H3, H4, H5, H8 e H9 refutadas; H2 e H7 inconclusivas (seção 9).
 - **Tamanho da oportunidade:** se os pedidos atrasados tivessem a mistura de notas dos pedidos no prazo, o NPS iria de −79,8 para −32,4, um ganho de 47 pontos com intervalo de 38 a 57, como teto otimista (seção 10).
 
+### Modelo
+
+Números da [modelagem](notebooks/03_modelagem.ipynb), com validação cruzada nos 2.000 pedidos de treino e uma única avaliação nos 500 de teste; a ficha do modelo está no [model card](reports/model_card.md):
+
+- **Escolha:** a regressão logística vence o gradient boosting por 0,015 de ROC-AUC na validação cruzada, acima da margem de 0,01 que levaria ao desempate pelo mais simples, e a regressão da nota, medida como comparação, empata com a classificação (seções 2 e 3).
+- **Teste:** ROC-AUC de 0,869, contra 0,784 da regra de dias de atraso e 0,500 do modelo ingênuo. A diferença para a regra é de 0,085, com intervalo de 0,044 a 0,129, e, com a PR-AUC também acima, o modelo atende aos três critérios da [D-15](reports/registro_decisoes.md#d-15-alvos-do-modelo-e-da-meta-de-negócio) (seção 10).
+- **Onde está o ganho:** nos pedidos com até 2 dias de atraso, seis em cada dez, em que a regra só separa zero, um e dois dias, a diferença sobe para 0,120 no teste. É nesse segmento que o modelo ordena a lista do dia (seções 4 e 10).
+- **Sinais:** dias de atraso, reclamações e, bem atrás, tempo de resolução. Sem as reclamações, o modelo conserva cerca de três quartos da vantagem sobre a regra; só com cadastro e pedido, no checkout, fica perto do sorteio (seções 5 e 6).
+- **Calibração e grupos:** a probabilidade prevista acompanha a proporção observada em nove das dez faixas de risco, e o erro fica a menos de meio ponto nas regiões e a até quatro pontos nas faixas de idade (seções 7 e 8).
+- **Lista do dia:** 20% dos pedidos entregues, metade com 3 dias de atraso ou mais, na ordem do atraso, e metade com até 2 dias, na ordem do risco do modelo, cada um com a ação definida pela falha registrada ([D-19](reports/registro_decisoes.md#d-19-uso-do-score-por-segmento-de-atraso-com-a-ação-definida-pela-falha-do-pedido)).
+
 ## Estrutura do Repositório
 
 Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/).
@@ -72,28 +84,34 @@ Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-scien
 ```
 ├── data/                        # fora do Git (D-01)
 │   ├── raw/                     # base original, baixada por python -m src.dataset
-│   └── processed/               # base tratada, gerada por python -m src.features
-├── models/                      # modelo treinado, na etapa de modelagem
+│   └── processed/               # base tratada e lista do dia, geradas por comando
+├── models/                      # modelo treinado por python -m src.modeling.train, fora do Git
 ├── notebooks/
 │   ├── 01_qualidade_e_tratamento.ipynb
-│   └── 02_eda.ipynb
+│   ├── 02_eda.ipynb
+│   └── 03_modelagem.ipynb
 ├── references/
 │   └── dicionario_de_dados.md
 ├── reports/
 │   ├── entendimento_negocio.md
 │   ├── definicao_target.md
 │   ├── estrategia_preditiva.md
+│   ├── model_card.md
 │   ├── registro_decisoes.md
-│   └── figures/                 # figuras da análise exploratória, usadas nos slides
+│   └── figures/                 # figuras da análise exploratória e da modelagem, usadas nos slides
 ├── src/
 │   ├── config.py                # caminhos, semente, fonte da base e tamanho do teste
 │   ├── dataset.py               # download da base e conferência do SHA-256
 │   ├── features.py              # atributos de negócio e geração da base tratada
 │   ├── split.py                 # separação de treino e teste (D-11)
 │   ├── analysis.py              # proporções, efeitos e vereditos da análise exploratória
-│   ├── plots.py                 # gráficos da análise exploratória
-│   └── modeling/                # treino e predição, na etapa de modelagem
-├── tests/                       # download, atributos, base tratada, separação e análise
+│   ├── plots.py                 # gráficos da análise exploratória e da modelagem
+│   └── modeling/
+│       ├── models.py            # variáveis, preparação, candidatos e busca (D-06 e D-18)
+│       ├── evaluation.py        # validação cruzada, comparação com a regra e diagnósticos
+│       ├── train.py             # treino e gravação do modelo
+│       └── predict.py           # risco dos pedidos e lista do dia (D-19)
+├── tests/                       # download, atributos, base tratada, separação, análise e modelagem
 ├── LICENSE
 ├── Makefile
 ├── pyproject.toml
@@ -113,7 +131,9 @@ Requer Python 3.13 e Git.
 4. Baixe a base e confira a integridade: `python -m src.dataset`. Na primeira vez o comando precisa de internet; depois, ele só confere o arquivo.
 5. Gere a base tratada: `python -m src.features`.
 6. Execute os notebooks na ordem numérica, do início ao fim.
-7. Rode os testes: `python -m pytest tests`. Os testes da base tratada pedem o passo 5.
+7. Treine o modelo: `python -m src.modeling.train`. Ele vai para `models/`, fora do Git, com um JSON de rastreio ao lado.
+8. Gere a lista do dia: `python -m src.modeling.predict data/processed/base_tratada.csv`. A entrada pode ser qualquer CSV com `order_id` e as colunas de cadastro, pedido, entrega e atendimento; a lista sai em `data/processed/lista_do_dia.csv`.
+9. Rode os testes: `python -m pytest tests`. Os testes da base tratada pedem o passo 5.
 
 
 ## Registro de Decisões
@@ -126,7 +146,7 @@ As decisões do projeto, com contexto, alternativas consideradas, justificativa 
 - **Não resposta.** A base traz só quem respondeu à pesquisa, e o viés de não resposta não pode ser medido.
 - **Atendimento.** Reclamações e tempo de resolução não se vinculam com segurança ao pedido avaliado (D-09).
 - **Associação.** Os achados da análise exploratória descrevem associação, e não causa; o efeito de cada ação só se confirma em piloto com grupo de controle.
-- **Próximos passos.** Modelo de risco de detrator, pelo plano da [estratégia preditiva](reports/estrategia_preditiva.md), avaliado no teste reservado antes da análise exploratória (D-11) contra o modelo ingênuo e a regra de dias de atraso.
+- **Próximos passos.** Validar com o atendimento a capacidade de 20% e as ações por tipo de falha e rodar, por dois trimestres, o piloto com grupo de controle da [D-20](reports/registro_decisoes.md#d-20-piloto-com-grupo-de-controle-para-medir-o-efeito-das-ações), contra a meta de reduzir os detratores em 10 pontos. Na operação, o modelo é comparado todo mês com a regra de dias de atraso e retreinado com os clientes do grupo de controle permanente, como descreve o [model card](reports/model_card.md#8-monitoramento-e-retreino).
 
 As premissas, restrições e riscos completos estão na [seção 7 do entendimento do negócio](reports/entendimento_negocio.md#7-premissas-restrições-e-riscos).
 
