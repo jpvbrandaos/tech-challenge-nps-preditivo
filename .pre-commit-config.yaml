@@ -1,0 +1,20 @@
+# Conferências de cada commit; a integração contínua repete as mesmas em todo push
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Barra arquivos grandes, como uma base de dados adicionada por engano; o maior notebook
+      # tem cerca de 750 KB
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.2 # a mesma versão do requirements.txt
+    hooks:
+      - id: ruff-check
+        args: ["--fix"]
+      - id: ruff-format
