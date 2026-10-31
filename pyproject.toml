@@ -21,12 +21,17 @@ requires-python = "~=3.13.0"
 [tool.ruff]
 line-length = 99
 src = ["src"]
-include = ["pyproject.toml", "src/**/*.py"]
+include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py", "notebooks/**/*.ipynb"]
 
 [tool.ruff.lint]
-extend-select = ["I"]  # Add import sorting
+# Além do padrão: ordem dos imports, erros prováveis, sintaxe atual e docstrings
+extend-select = ["I", "B", "UP", "D1"]
+
+[tool.ruff.lint.per-file-ignores]
+# Testes e notebooks dispensam docstrings: o nome do teste e o texto do notebook explicam o código
+"tests/**" = ["D1"]
+"notebooks/**" = ["D1"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
 force-sort-within-sections = true
-

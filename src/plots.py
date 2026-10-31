@@ -134,7 +134,8 @@ def plot_rates(
     """Um painel de `plot_rate` por tabela, todos na mesma escala para comparar os efeitos."""
     fig, axes = grid(len(tables), ncols, panel_size)
     ylim = rate_limits(tables.values())
-    for ax, (title, table) in zip(axes.flat, tables.items()):
+    # A grade pode ter mais painéis que tabelas: o zip para na última tabela
+    for ax, (title, table) in zip(axes.flat, tables.items(), strict=False):
         plot_rate(table, ax=ax, kind=kind, reference=reference, title=title, ylim=ylim)
         if rotation:
             plt.setp(ax.get_xticklabels(), rotation=rotation, ha="right", rotation_mode="anchor")
@@ -207,7 +208,7 @@ def plot_rate_heatmaps(
     Todos os mapas usam o mesmo alvo e, portanto, o mesmo centro de cor: uma barra basta.
     """
     fig, axes = grid(len(pairs), ncols, panel_size, layout="constrained")
-    for ax, (title, (rows, columns)) in zip(axes.flat, pairs.items()):
+    for ax, (title, (rows, columns)) in zip(axes.flat, pairs.items(), strict=False):
         plot_rate_heatmap(rows, columns, target, ax=ax, title=title, colorbar=False)
     fig.colorbar(axes.flat[0].collections[0], ax=axes, shrink=0.5, label="% detratores")
     return fig
