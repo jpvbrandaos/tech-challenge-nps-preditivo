@@ -1,0 +1,50 @@
+# Integração contínua: em todo push na main e em toda pull request, confere o estilo, roda os
+# testes e refaz o projeto do zero numa máquina Linux limpa
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  qualidade:
+    name: Estilo e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Instala as dependências
+        run: make requirements
+      - name: Confere o estilo
+        run: pre-commit run --all-files --show-diff-on-failure
+      - name: Baixa a base e gera a base tratada
+        run: make data features
+      - name: Roda os testes
+        run: make test
+
+  reproducao:
+    name: Reprodução do zero
+    needs: qualidade
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Instala as dependências
+        run: make requirements
+      - name: Refaz o projeto, com os notebooks
+        run: make pipeline
+      - name: Confere o modelo reproduzido
+        # A ROC-AUC na validação cruzada é a do README e do model card
+        run: |
+          cat models/modelo_detrator.json
+          python -c "import json; assert json.load(open('models/modelo_detrator.json'))['roc_auc_validacao_cruzada'] == 0.8962"

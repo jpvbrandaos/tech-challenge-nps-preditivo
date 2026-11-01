@@ -7,7 +7,7 @@ Closes #
 -
 
 ## Checklist
-- [ ] Notebooks rodam do início ao fim (Restart & Run All)
-- [ ] `pytest` passa
+- [ ] Notebooks rodam do início ao fim (`python -m src.pipeline` ou Restart & Run All)
+- [ ] Integração contínua aprovada
 - [ ] Números conferidos com o README
 - [ ] Itens da issue marcados
