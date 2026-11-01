@@ -1,6 +1,19 @@
 # NPS Preditivo
 
-Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS. O diagnóstico da base está concluído: os dados são íntegros, mas têm sinais claros de simulação, e as conclusões valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)). Na análise exploratória, o atraso aparece como a falha que mais pesa: metade dos clientes que recebem no prazo é detratora, contra quase todos a partir de três dias de atraso. O modelo de risco, uma regressão logística, supera no teste a regra de dias de atraso, com ROC-AUC de 0,869 contra 0,784, e o ganho é maior nos pedidos com até 2 dias de atraso, que ele ordena na lista diária de contato.
+[![Integração contínua](https://github.com/jpvbrandaos/tech-challenge-nps-preditivo/actions/workflows/ci.yml/badge.svg)](https://github.com/jpvbrandaos/tech-challenge-nps-preditivo/actions/workflows/ci.yml)
+![Python 3.13](https://img.shields.io/badge/python-3.13-3776AB)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-green)](LICENSE)
+
+Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS, a tempo de a empresa agir antes da pesquisa.
+
+## Resumo executivo
+
+- **O atraso é a falha que mais pesa, e cada dia conta.** Metade dos clientes que recebem no prazo é detratora, contra quase todos a partir de três dias de atraso.
+- **O atendimento pesa mesmo sem atraso.** Nos pedidos entregues no prazo, quem procurou o atendimento tem 39 pontos a mais de detratores.
+- **O perfil do cliente quase não pesa.** Região, idade, tempo de relacionamento, valor do pedido e parcelamento ficam todos entre 81% e 89% de detratores: o que separa os clientes é o que aconteceu com o pedido.
+- **O modelo antecipa o risco.** No teste, a regressão logística põe o detrator à frente do não detrator em quase nove de cada dez pares, contra quase oito da regra de dias de atraso (ROC-AUC de 0,869 contra 0,784). Ela ordena a lista diária de contato nos pedidos com até 2 dias de atraso, onde o ganho sobre a regra é maior.
+
+A base é simulada, e os números valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)); o efeito das ações sobre os detratores se mede num piloto com grupo de controle ([D-20](reports/registro_decisoes.md#d-20-piloto-com-grupo-de-controle-para-medir-o-efeito-das-ações)).
 
 ## Objetivo
 
@@ -82,6 +95,9 @@ Números da [modelagem](notebooks/03_modelagem.ipynb), com validação cruzada n
 Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/).
 
 ```
+├── .github/
+│   ├── workflows/ci.yml         # integração contínua: estilo, testes e reprodução do zero
+│   └── pull_request_template.md
 ├── data/                        # fora do Git (D-01)
 │   ├── raw/                     # base original, baixada por python -m src.dataset
 │   └── processed/               # base tratada e lista do dia, geradas por comando
@@ -106,35 +122,45 @@ Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-scien
 │   ├── split.py                 # separação de treino e teste (D-11)
 │   ├── analysis.py              # proporções, efeitos e vereditos da análise exploratória
 │   ├── plots.py                 # gráficos da análise exploratória e da modelagem
+│   ├── pipeline.py              # reprodução do projeto, da base bruta à lista do dia
 │   └── modeling/
 │       ├── models.py            # variáveis, preparação, candidatos e busca (D-06 e D-18)
 │       ├── evaluation.py        # validação cruzada, comparação com a regra e diagnósticos
 │       ├── train.py             # treino e gravação do modelo
 │       └── predict.py           # risco dos pedidos e lista do dia (D-19)
-├── tests/                       # download, atributos, base tratada, separação, análise e modelagem
+├── tests/                       # download, atributos, base tratada, separação, análise, modelagem e reprodução
+├── .pre-commit-config.yaml      # conferências de estilo a cada commit
 ├── LICENSE
-├── Makefile
-├── pyproject.toml
-└── requirements.txt
+├── Makefile                     # atalhos dos comandos, em Linux e macOS
+├── pyproject.toml               # pacote do projeto e regras do ruff
+└── requirements.txt             # versões fixas, com os pacotes de cada sistema marcados
 ```
 
 ## Como Reproduzir
 
-Requer Python 3.13 e Git.
+Requer Python 3.13 e Git, em Windows, Linux ou macOS.
 
 1. Clone o repositório:
    `git clone https://github.com/jpvbrandaos/tech-challenge-nps-preditivo.git`
 2. Crie e ative o ambiente virtual:
    - Windows (PowerShell): `py -3.13 -m venv .venv` e `.\.venv\Scripts\Activate.ps1`
    - Linux ou macOS: `python3.13 -m venv .venv` e `source .venv/bin/activate`
-3. Instale as dependências: `pip install -r requirements.txt`
-4. Baixe a base e confira a integridade: `python -m src.dataset`. Na primeira vez o comando precisa de internet; depois, ele só confere o arquivo.
-5. Gere a base tratada: `python -m src.features`.
-6. Execute os notebooks na ordem numérica, do início ao fim.
-7. Treine o modelo: `python -m src.modeling.train`. Ele vai para `models/`, fora do Git, com um JSON de rastreio ao lado.
-8. Gere a lista do dia: `python -m src.modeling.predict data/processed/base_tratada.csv`. A entrada pode ser qualquer CSV com `order_id` e as colunas de cadastro, pedido, entrega e atendimento; a lista sai em `data/processed/lista_do_dia.csv`.
-9. Rode os testes: `python -m pytest tests`. Os testes da base tratada pedem o passo 5.
+3. Instale as dependências: `pip install -r requirements.txt`. As versões são fixas, e os pacotes que só existem num sistema vêm marcados.
+4. Refaça o projeto: `python -m src.pipeline`. O comando baixa a base e confere o SHA-256, gera a base tratada, roda os três notebooks do início ao fim, treina o modelo e gera a lista do dia. A base vem da internet só na primeira vez; com `--no-notebooks`, os notebooks ficam de fora.
+5. Rode os testes: `python -m pytest tests`.
 
+No Windows e no Linux, testados, os números dos notebooks saem iguais aos do repositório; as figuras podem mudar de aparência com as fontes de cada sistema. A integração contínua refaz o projeto do zero numa máquina Linux a cada pull request.
+
+Cada etapa também roda sozinha:
+
+| Etapa | Comando | Gera |
+| --- | --- | --- |
+| Base bruta | `python -m src.dataset` | `data/raw/desafio_nps_fase_1.csv`, conferido pelo SHA-256 |
+| Base tratada | `python -m src.features` | `data/processed/base_tratada.csv` |
+| Modelo | `python -m src.modeling.train` | `models/modelo_detrator.joblib` e um JSON de rastreio ao lado |
+| Lista do dia | `python -m src.modeling.predict data/processed/base_tratada.csv` | `data/processed/lista_do_dia.csv` |
+
+A lista do dia aceita qualquer CSV com `order_id` e as colunas de cadastro, pedido, entrega e atendimento. Em Linux e macOS, o `Makefile` atalha os mesmos comandos, como `make pipeline` e `make test`; `make help` lista todos.
 
 ## Registro de Decisões
 
@@ -154,11 +180,12 @@ As premissas, restrições e riscos completos estão na [seção 7 do entendimen
 
 - Código em inglês e `snake_case`, como as colunas da base; textos em português.
 - Notebooks numerados na ordem de execução (`01_`, `02_`, `03_`).
-- Todo notebook roda do início ao fim (Restart & Run All) antes do commit e vai com as saídas.
+- Todo notebook roda do início ao fim antes do commit e vai com as saídas: Restart & Run All no editor, ou `python -m src.pipeline`, que refaz todos.
 - Caminhos sempre via `src/config.py`; semente sempre `RANDOM_SEED`.
 - `data/raw/` é imutável.
+- Estilo pelo ruff, com as regras do `pyproject.toml`: `pre-commit install` liga a conferência a cada commit, e a integração contínua repete em todo push.
 - Commits no padrão Conventional Commits, em português.
-- Uma branch e uma pull request por etapa.
+- Uma issue, uma branch e uma pull request por etapa; o histórico está nas [issues](https://github.com/jpvbrandaos/tech-challenge-nps-preditivo/issues?q=is%3Aissue) e nas [pull requests](https://github.com/jpvbrandaos/tech-challenge-nps-preditivo/pulls?q=is%3Apr).
 
 ## Autor
 
