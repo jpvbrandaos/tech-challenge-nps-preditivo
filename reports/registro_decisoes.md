@@ -175,9 +175,18 @@ Decisões que afetam escopo, dados, métricas ou método do projeto. Cada entrad
 
 ## D-20: Piloto com grupo de controle para medir o efeito das ações
 
-- **Status:** aceita em 30/10/2026
+- **Status:** aceita em 30/10/2026; critério de aprovação substituído pela [D-21](#d-21-critério-do-piloto-alinhado-ao-tamanho-da-amostra) em 02/11/2026
 - **Contexto:** a análise exploratória mede associação, e não o efeito de uma ação, e a meta de negócio é medida contra um grupo de controle ([D-15](#d-15-alvos-do-modelo-e-da-meta-de-negócio)). A H6 mediu o desconto dado na compra, e não um cupom de recuperação. Um modelo retreinado com notas de clientes que receberam ação aprende o efeito da ação junto com o risco.
 - **Decisão:** o piloto sorteia os clientes, em partes iguais, entre o processo novo, com o alerta de atraso, o score e as ações da [D-19](#d-19-uso-do-score-por-segmento-de-atraso-com-a-ação-definida-pela-falha-do-pedido), e o processo atual, por dois trimestres e com pelo menos 254 clientes que responderam à pesquisa em cada grupo. O resultado principal é a diferença na proporção de detratores entre os grupos, com intervalo de confiança, contra a meta de 10 pontos; as métricas de proteção são medidas nos dois grupos. Depois do piloto, 10% dos clientes, sorteados, seguem sem ação.
 - **Alternativas consideradas:** implantar para todos e comparar antes e depois; comparar clientes acionados com não acionados, sem sorteio.
 - **Justificativa:** só o sorteio separa o efeito do processo de mudanças de época e de perfil; antes e depois mistura os dois, e quem não foi acionado difere de quem foi justamente pelo risco. Os 254 clientes por grupo são o mínimo para detectar a queda de 84,4% para 74,4% com 5% de significância e 80% de poder. O controle permanente mantém a medida do efeito ao longo do tempo e dados de treino sem a influência das ações.
 - **Consequências:** o score só vai para a operação inteira se o piloto atingir a meta sem piorar as métricas de proteção. Os efeitos por segmento e por tipo de falha orientam a divisão da capacidade, mas, com o tamanho mínimo, não decidem sozinhos.
+
+## D-21: Critério do piloto alinhado ao tamanho da amostra
+
+- **Status:** aceita em 02/11/2026
+- **Contexto:** a seção 7 da [estratégia preditiva](estrategia_preditiva.md#7-como-medir-o-resultado) aprovava o piloto se a queda estimada de detratores fosse de 10 pontos ou mais, com o intervalo acima de zero. As 254 respostas por grupo da [D-20](#d-20-piloto-com-grupo-de-controle-para-medir-o-efeito-das-ações) foram calculadas para detectar uma queda real de 10 pontos com 80% de poder. Com esse tamanho, se a queda real for de exatamente 10 pontos, o intervalo fica acima de zero em 80% dos pilotos, mas a estimativa só chega a 10 pontos em metade deles.
+- **Decisão:** o piloto é aprovado se a queda de detratores do processo novo frente ao grupo de controle tiver intervalo de confiança de 95% acima de zero, sem piora nas métricas de proteção. Com 254 respostas por grupo, isso exige uma queda estimada de cerca de 7 pontos ou mais. A meta de 10 pontos da [D-15](#d-15-alvos-do-modelo-e-da-meta-de-negócio) segue como a queda que o piloto foi dimensionado para detectar.
+- **Alternativas consideradas:** manter a exigência de estimativa de 10 pontos ou mais; aumentar a amostra.
+- **Justificativa:** o critério de aprovação precisa usar a mesma régua do cálculo de tamanho. Com a exigência anterior, um processo que entrega exatamente a meta seria reprovado em um de cada dois pilotos, e aumentar a amostra não muda isso: com efeito real igual à meta, a estimativa fica acima ou abaixo dela com a mesma chance, qualquer que seja o tamanho.
+- **Consequências:** substitui o critério da seção 7 da estratégia preditiva. A consequência da D-20 passa a valer com ele: o score só vai para a operação inteira se o piloto for aprovado por este critério. O entendimento do negócio, o README e a apresentação citam o novo critério.
