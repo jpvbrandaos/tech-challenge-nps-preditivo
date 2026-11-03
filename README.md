@@ -21,7 +21,7 @@ Identificar as falhas de entrega e atendimento que mais transformam clientes em 
 
 O problema de negócio, as metas e os critérios de sucesso estão em [Entendimento do negócio](reports/entendimento_negocio.md).
 
-Apresentação para a liderança de Experiência do Cliente: [slides em PDF](reports/apresentacao.pdf) e [vídeo executivo](https://youtu.be/qvG0OouDo4g).
+Apresentação para a liderança de Experiência do Cliente: [slides em PDF](reports/apresentacao.pdf) e [vídeo de apresentação](https://youtu.be/QpGAEanJWQE).
 
 ## Base de Dados
 
