@@ -6,14 +6,12 @@
 
 Projeto de ciência de dados que estima, logo após a entrega, o risco de cada cliente de um e-commerce se tornar detrator na pesquisa de NPS, a tempo de a empresa agir antes da pesquisa.
 
-Apresentação para a liderança de Experiência do Cliente: [slides em PDF](reports/apresentacao.pdf).
-
 ## Resumo executivo
 
 - **O atraso é a falha que mais pesa, e cada dia conta.** Metade dos clientes que recebem no prazo é detratora, contra quase todos a partir de três dias de atraso.
 - **O atendimento pesa mesmo sem atraso.** Nos pedidos entregues no prazo, quem procurou o atendimento tem 39 pontos a mais de detratores.
 - **O perfil do cliente quase não pesa.** Região, idade, tempo de relacionamento, valor do pedido e parcelamento ficam todos entre 81% e 89% de detratores: o que separa os clientes é o que aconteceu com o pedido.
-- **O modelo antecipa o risco.** No teste, a regressão logística põe o detrator à frente do não detrator em quase nove de cada dez pares, contra quase oito da regra de dias de atraso (ROC-AUC de 0,869 contra 0,784). Ela ordena a lista do dia nos pedidos com até 2 dias de atraso, onde o ganho sobre a regra é maior.
+- **O modelo antecipa o risco.** No teste, a regressão logística põe o detrator à frente do não detrator em quase nove de cada dez pares, contra quase oito da regra de dias de atraso (ROC-AUC de 0,869 contra 0,784). Ela ordena a lista diária de contato nos pedidos com até 2 dias de atraso, onde o ganho sobre a regra é maior.
 
 A base é simulada, e os números valem como demonstração de método ([D-10](reports/registro_decisoes.md#d-10-base-tratada-como-simulada)); o efeito das ações sobre os detratores se mede num piloto com grupo de controle ([D-20](reports/registro_decisoes.md#d-20-piloto-com-grupo-de-controle-para-medir-o-efeito-das-ações)).
 
@@ -22,6 +20,8 @@ A base é simulada, e os números valem como demonstração de método ([D-10](r
 Identificar as falhas de entrega e atendimento que mais transformam clientes em detratores e estimar, logo após a entrega, o risco de cada cliente se tornar detrator, a tempo de a empresa agir antes da pesquisa de NPS. O projeto responde ao Tech Challenge da Fase 1 da Pós-Tech AI Scientist (FIAP).
 
 O problema de negócio, as metas e os critérios de sucesso estão em [Entendimento do negócio](reports/entendimento_negocio.md).
+
+Apresentação para a liderança de Experiência do Cliente: [slides em PDF](reports/apresentacao.pdf) e [vídeo executivo](https://youtu.be/qvG0OouDo4g).
 
 ## Base de Dados
 
@@ -52,16 +52,14 @@ Antes da análise exploratória, `src/split.py` reserva 20% dos pedidos para o t
 
 ## Metodologia
 
-O projeto segue as seis fases do CRISP-DM em oito etapas, cada uma com um documento, notebook ou código próprio:
+O projeto segue as fases do CRISP-DM, cada uma com um documento ou notebook próprio:
 
 1. [Entendimento do negócio](reports/entendimento_negocio.md): problema, metas e critérios de sucesso, premissas e hipóteses.
 2. [Definição da variável-alvo](reports/definicao_target.md): escolha da variável, regra de classificação, variáveis permitidas no modelo e riscos de uso.
 3. [Qualidade e preparação dos dados](notebooks/01_qualidade_e_tratamento.ipynb): diagnóstico da base, decisões de tratamento e base tratada com os atributos de negócio.
 4. [Análise exploratória](notebooks/02_eda.ipynb): fatores associados aos detratores, pontos de ruptura, interações, perfis de cliente, veredito das hipóteses e referências para o modelo, só com os pedidos de treino (D-11).
 5. [Estratégia preditiva](reports/estrategia_preditiva.md): pergunta do modelo, momento da predição, escolha entre regressão e classificação, plano de avaliação, uso do score pela empresa e piloto com grupo de controle.
-6. [Modelagem](notebooks/03_modelagem.ipynb): candidatos comparados por validação cruzada no treino, regressão da nota como comparação, robustez, calibração e erro por grupo (seções 1 a 9).
-7. [Avaliação](reports/model_card.md#4-avaliação): uma única avaliação no teste contra a regra de dias de atraso, pelos critérios fixados antes do treino (seção 10 da modelagem); o critério de negócio fica para o piloto ([D-21](reports/registro_decisoes.md#d-21-critério-do-piloto-alinhado-ao-tamanho-da-amostra)).
-8. [Implantação](reports/model_card.md#8-monitoramento-e-retreino): lista do dia gerada por `python -m src.modeling.predict`, modelo gravado em `models/` com a versão registrada, monitoramento, retreino, piloto com grupo de controle ([D-20](reports/registro_decisoes.md#d-20-piloto-com-grupo-de-controle-para-medir-o-efeito-das-ações)) e [apresentação para a liderança](reports/apresentacao.pdf); a produção fica fora do escopo.
+6. [Modelagem](notebooks/03_modelagem.ipynb): candidatos comparados por validação cruzada no treino, regressão da nota como comparação, robustez, calibração, erro por grupo e uma única avaliação no teste contra a regra de dias de atraso, resumidos no [model card](reports/model_card.md).
 
 ## Principais Resultados
 
@@ -118,9 +116,7 @@ Estrutura baseada no [Cookiecutter Data Science](https://cookiecutter-data-scien
 │   ├── estrategia_preditiva.md
 │   ├── model_card.md
 │   ├── registro_decisoes.md
-│   ├── apresentacao.pdf         # slides para a liderança de Experiência do Cliente
-│   ├── apresentacao.pptx        # fonte editável dos slides, com o roteiro do vídeo nas notas
-│   └── figures/                 # figuras da análise exploratória e da modelagem
+│   └── figures/                 # figuras da análise exploratória e da modelagem, usadas nos slides
 ├── src/
 │   ├── config.py                # caminhos, semente, fonte da base e tamanho do teste
 │   ├── dataset.py               # download da base e conferência do SHA-256
@@ -178,7 +174,7 @@ As decisões do projeto, com contexto, alternativas consideradas, justificativa 
 - **Não resposta.** A base traz só quem respondeu à pesquisa, e o viés de não resposta não pode ser medido.
 - **Atendimento.** Reclamações e tempo de resolução não se vinculam com segurança ao pedido avaliado (D-09).
 - **Associação.** Os achados da análise exploratória descrevem associação, e não causa; o efeito de cada ação só se confirma em piloto com grupo de controle.
-- **Próximos passos.** Validar com o atendimento a capacidade de 20% e as ações por tipo de falha e rodar, por dois trimestres, o piloto com grupo de controle da [D-20](reports/registro_decisoes.md#d-20-piloto-com-grupo-de-controle-para-medir-o-efeito-das-ações), dimensionado para detectar uma queda de 10 pontos nos detratores e aprovado se a queda frente ao controle tiver intervalo acima de zero ([D-21](reports/registro_decisoes.md#d-21-critério-do-piloto-alinhado-ao-tamanho-da-amostra)). Na operação, o modelo é comparado todo mês com a regra de dias de atraso e retreinado com os clientes do grupo de controle permanente, como descreve o [model card](reports/model_card.md#8-monitoramento-e-retreino).
+- **Próximos passos.** Validar com o atendimento a capacidade de 20% e as ações por tipo de falha e rodar, por dois trimestres, o piloto com grupo de controle da [D-20](reports/registro_decisoes.md#d-20-piloto-com-grupo-de-controle-para-medir-o-efeito-das-ações), contra a meta de reduzir os detratores em 10 pontos. Na operação, o modelo é comparado todo mês com a regra de dias de atraso e retreinado com os clientes do grupo de controle permanente, como descreve o [model card](reports/model_card.md#8-monitoramento-e-retreino).
 
 As premissas, restrições e riscos completos estão na [seção 7 do entendimento do negócio](reports/entendimento_negocio.md#7-premissas-restrições-e-riscos).
 
